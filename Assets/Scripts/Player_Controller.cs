@@ -9,6 +9,7 @@ public class Player_Controller : MonoBehaviour
     public float _speed;
 
     private void Awake() {
+        //Get components
         _rb = GetComponent<Rigidbody>();
         _control = new InputSystem_Actions();
     }
