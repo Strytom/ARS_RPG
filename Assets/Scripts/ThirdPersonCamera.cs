@@ -59,7 +59,6 @@ public class ThirdPersonCamera : MonoBehaviour
     {
         if (_target == null) return;
 
-        // Если курсор не заблокирован (например, открыто меню), камеру не вращаем
         if (Cursor.lockState == CursorLockMode.Locked)
         {
             // Считываем Mouse Delta (изменение позиции мыши за кадр) из Input Action Asset
