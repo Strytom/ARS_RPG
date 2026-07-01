@@ -4,24 +4,24 @@ using UnityEngine.InputSystem;
 public class ThirdPersonCamera : MonoBehaviour
 {
     [Header("Link")]
-    [SerializeField] private Transform _target; // Объект, за которым следит камера (наш игрок)
+    [SerializeField] private Transform _target; // The object the camera follows (our player)
 
-    [Header("Параметры орбиты")]
-    [SerializeField] private float _distance = 5.0f;       // Дистанция от игрока
-    [SerializeField] private float _sensitivityX = 0.15f;  // Чувствительность мыши по X
-    [SerializeField] private float _sensitivityY = 0.1f;   // Чувствительность мыши по Y
-    [SerializeField] private float _minPitch = -20f;       // Ограничение наклона вниз
-    [SerializeField] private float _maxPitch = 70f;        // Ограничение наклона вверх
+    [Header("Orbit parameters")]
+    [SerializeField] private float _distance = 5.0f;       // Distance from the player
+    [SerializeField] private float _sensitivityX = 0.15f;  // Mouse sensitivity on X
+    [SerializeField] private float _sensitivityY = 0.1f;   // Mouse sensitivity on Y
+    [SerializeField] private float _minPitch = -20f;       // Minimum pitch angle
+    [SerializeField] private float _maxPitch = 70f;        // Maximum pitch angle
 
     private InputSystem_Actions _inputActions;
-    private float _yaw;   // Угол поворота по горизонтали
-    private float _pitch; // Угол наклона по вертикали
+    private float _yaw;   // Horizontal rotation angle
+    private float _pitch; // Vertical pitch angle
 
     private void Awake()
     {
         _inputActions = new InputSystem_Actions();
         
-        // Инициализируем стартовые углы камеры на основе её текущего поворота на сцене
+        // Initialize the camera start angles based on its current scene rotation
         Vector3 currentEuler = transform.eulerAngles;
         _yaw = currentEuler.y;
         _pitch = currentEuler.x;
@@ -39,13 +39,13 @@ public class ThirdPersonCamera : MonoBehaviour
 
     private void Start()
     {
-        // Скрываем и блокируем курсор мыши при старте игры
+        // Hide and lock the mouse cursor when the game starts
         LockCursor();
     }
 
     private void Update()
     {
-        // Даем игроку возможность разблокировать мышь по нажатию Escape (например для меню)
+        // Allow the player to unlock the mouse with Escape (for example, for menus)
         if (Keyboard.current.escapeKey.wasPressedThisFrame)
         {
             if (Cursor.lockState == CursorLockMode.Locked)
@@ -61,24 +61,24 @@ public class ThirdPersonCamera : MonoBehaviour
 
         if (Cursor.lockState == CursorLockMode.Locked)
         {
-            // Считываем Mouse Delta (изменение позиции мыши за кадр) из Input Action Asset
+            // Read mouse delta (mouse change per frame) from the Input Action Asset
             Vector2 lookInput = _inputActions.Player.Look.ReadValue<Vector2>();
 
-            // Накапливаем углы вращения
+            // Accumulate rotation angles
             _yaw += lookInput.x * _sensitivityX;
-            _pitch -= lookInput.y * _sensitivityY; // Инвертируем Y, чтобы движение мыши вверх поднимало камеру
+            _pitch -= lookInput.y * _sensitivityY; // Invert Y so moving the mouse up raises the camera
 
-            // Ограничиваем вертикальный угол, чтобы не проваливаться под землю
+            // Clamp the vertical angle so the camera doesn't go below the ground
             _pitch = Mathf.Clamp(_pitch, _minPitch, _maxPitch);
         }
 
-        // Вычисляем новое вращение камеры
+        // Calculate the new camera rotation
         Quaternion rotation = Quaternion.Euler(_pitch, _yaw, 0);
 
-        // Находим целевую позицию камеры (смещаем ее назад от игрока на расстояние _distance)
+        // Find the target camera position (move it back from the player by _distance)
         Vector3 position = _target.position + rotation * (Vector3.back * _distance);
 
-        // Применяем позицию и поворот
+        // Apply the position and rotation
         transform.rotation = rotation;
         transform.position = position;
     }
