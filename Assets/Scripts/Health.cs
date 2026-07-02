@@ -26,7 +26,7 @@ public class Health : MonoBehaviour, IDamageable
         _currentHP = _maxHP;
         _rb = GetComponent<Rigidbody>();
 
-        // Если рендерер не назначен вручную, пытаемся найти его на объекте
+        // If the renderer is not assigned manually, try to find it on the object
         if (_characterRenderer == null)
         {
             _characterRenderer = GetComponentInChildren<Renderer>();
@@ -40,64 +40,64 @@ public class Health : MonoBehaviour, IDamageable
 
     private void Start()
     {
-        // Вызываем событие при старте, чтобы UI сразу отобразил полное здоровье
+        // Invoke the event on start so UI shows full health immediately
         OnHealthChanged?.Invoke(_currentHP, _maxHP);
     }
 
     public void TakeDamage(float amount, Vector3 pushDirection)
     {
-        // Если персонаж в данный момент неуязвим — урон игнорируется
+        // If the character is currently invincible, damage is ignored
         if (_isInvincible || _currentHP <= 0) return;
 
         _currentHP -= amount;
         _currentHP = Mathf.Clamp(_currentHP, 0, _maxHP);
 
-        // Уведомляем всех подписчиков (например, шкалу здоровья в UI)
+        // Notify subscribers (for example, the health bar UI)
         OnHealthChanged?.Invoke(_currentHP, _maxHP);
 
-        // Применяем физический импульс отталкивания, если есть Rigidbody
+        // Apply physical knockback impulse if there is a Rigidbody
         if (_rb != null && pushDirection != Vector3.zero)
         {
-            // Обнуляем вертикальную составляющую, чтобы персонаж не улетал в небо
+            // Zero out the vertical component so the character doesn't fly upward
             pushDirection.y = 0;
-            // Применяем силу импульсом (ForceMode.Impulse идеально подходит для ударов)
+            // Apply the force as an impulse (ForceMode.Impulse is ideal for hits)
             _rb.AddForce(pushDirection, ForceMode.Impulse);
         }
 
-        // Проверяем смерть
+        // Check for death
         if (_currentHP <= 0)
         {
             Die();
         }
         else
         {
-            // Запускаем корутину неуязвимости и мигания красным цветом
+            // Start the invincibility coroutine and red flash
             StartCoroutine(DamageFeedbackRoutine());
         }
     }
 
     private void Die()
     {
-        Debug.Log($"{gameObject.name} погиб!");
+        Debug.Log($"{gameObject.name} died!");
         OnDeath?.Invoke();
         
-        // В реальной игре здесь отключалось бы управление и запускалась анимация смерти.
-        // Для прототипа мы пока просто выведем лог.
+        // In a real game, control would be disabled and a death animation played here.
+        // For the prototype, we just log it for now.
     }
 
     private IEnumerator DamageFeedbackRoutine()
     {
         _isInvincible = true;
 
-        // Эффект окрашивания в красный цвет
+        // Red tint effect
         if (_characterRenderer != null && _characterRenderer.material.HasProperty("_Color"))
         {
             _characterRenderer.material.color = Color.red;
-            yield return new WaitForSeconds(0.15f); // Держим красный цвет 150мс
+            yield return new WaitForSeconds(0.15f); // Hold red color for 150ms
             _characterRenderer.material.color = _originalColor;
         }
 
-        // Ждем остаток времени неуязвимости
+        // Wait the remaining invincibility time
         float remainingTime = _invincibilityDuration - 0.15f;
         if (remainingTime > 0)
         {

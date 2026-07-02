@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5846122057497519186}
   - component: {fileID: 854568605562698057}
   - component: {fileID: 2879997851966766033}
+  - component: {fileID: 1638233421495624986}
   - component: {fileID: 8333490811774314289}
   - component: {fileID: 1104000555671802863}
   m_Layer: 0
@@ -117,6 +118,21 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1638233421495624986
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1784553318814690841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 885d1fdd47fc846659ed4b171c7f688b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Health
+  _maxHP: 100
+  _invincibilityDuration: 0.5
+  _characterRenderer: {fileID: 854568605562698057}
 --- !u!114 &8333490811774314289
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -129,8 +145,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02e92f2b1b8944c30bf3bfc4cd060b8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player_Controller
-  _speed: 12
+  _speed: 10
   _rotationSpeed: 720
+  _jumpForce: 100
+  _attackPoint: {fileID: 0}
+  _attackRadius: 1.5
+  _damageableLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!54 &1104000555671802863
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -139,7 +161,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1784553318814690841}
   serializedVersion: 5
-  m_Mass: 1
+  m_Mass: 15
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -156,7 +178,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 80
   m_CollisionDetection: 0
 --- !u!1 &9020256774939723578
 GameObject:

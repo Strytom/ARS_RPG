@@ -42,7 +42,7 @@ public class Player_Controller : MonoBehaviour
         _rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
         _rb.useGravity = true;
 
-        // Если точка атаки не назначена вручную, создадим её программно чуть впереди игрока
+        // If the attack point isn't assigned manually, create it slightly in front of the player
         if (_attackPoint == null)
         {
             GameObject ap = new GameObject("AttackPoint");
@@ -56,7 +56,7 @@ public class Player_Controller : MonoBehaviour
     {
         _inputActions.Enable();
         _inputActions.Player.TestDamage.performed += OnTestDamagePressed;
-        // Подписка на атаки
+        // Subscribe to attack inputs
         _inputActions.Player.Attack.performed += OnLightAttack;
         _inputActions.Player.HeavyAttack.performed += OnHeavyAttack;
     }
@@ -165,84 +165,84 @@ public class Player_Controller : MonoBehaviour
     private IEnumerator AttackRoutine(float damage, float lockDuration, float pushForce, Color color, float scaleMultiplier)
     {
         IsAttacking = true;
-        _rb.linearVelocity = Vector3.zero; // Сбрасываем физическую инерцию бега
+        _rb.linearVelocity = Vector3.zero; // Reset running inertia
 
-        // 1. Мгновенный доворот лицом в сторону направления взгляда камеры
+        // 1. Instant turn to face the camera's look direction
         if (_cameraTransform != null)
         {
             Vector3 lookDir = _cameraTransform.forward;
-            lookDir.y = 0; // Нам нужен только поворот по горизонтали
+            lookDir.y = 0; // We only need horizontal rotation
             if (lookDir != Vector3.zero)
             {
                 _rb.rotation = Quaternion.LookRotation(lookDir);
             }
         }
 
-        // 2. Создаем визуальный плейсхолдер взмаха (простой расширяющийся полупрозрачный куб перед нами)
+        // 2. Create a visual swing placeholder (a simple expanding translucent cube in front of us)
         SpawnSlashPlaceholder(color, scaleMultiplier);
 
-        // 3. Расчет попадания (Hit Detection)
-        // Находим все коллайдеры в зоне нашего удара
+        // 3. Hit detection
+        // Find all colliders inside our attack zone
         Collider[] hitColliders = Physics.OverlapSphere(_attackPoint.position, _attackRadius * scaleMultiplier, _damageableLayer);
 
         foreach (Collider col in hitColliders)
         {
-            // Проверяем, чтобы мы не ударили сами себя
+            // Make sure we do not hit ourselves
             if (col.gameObject == gameObject) continue;
 
-            // Ищем у объекта интерфейс IDamageable
+            // Look for the IDamageable interface on the object
             IDamageable damageable = col.GetComponent<IDamageable>();
             if (damageable != null)
             {
-                // Рассчитываем вектор отталкивания (толкаем врага от себя)
+                // Calculate the push vector (push the enemy away)
                 Vector3 pushDirection = (col.transform.position - transform.position).normalized * pushForce;
                 
-                // Наносим урон через интерфейс!
+                // Deal damage through the interface!
                 damageable.TakeDamage(damage, pushDirection);
             }
         }
 
-        // Задержка (анимация удара и блокировка движения)
+        // Delay (attack animation and movement lock)
         yield return new WaitForSeconds(lockDuration);
         IsAttacking = false;
     }
     private void SpawnSlashPlaceholder(Color color, float scaleMultiplier)
     {
-        // Создаем временный куб, имитирующий визуальную дугу взмаха меча
+        // Create a temporary cube simulating a sword swing arc
         GameObject slash = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        Destroy(slash.GetComponent<BoxCollider>()); // Убираем коллайдер, чтобы он не мешал физике
+        Destroy(slash.GetComponent<BoxCollider>()); // Remove the collider so it doesn't interfere with physics
 
         slash.transform.SetParent(transform);
         slash.transform.position = _attackPoint.position;
         slash.transform.rotation = transform.rotation;
         
-        // Делаем его плоским и широким (как дуга взмаха)
+        // Make it flat and wide (like a swing arc)
         slash.transform.localScale = new Vector3(2.5f * scaleMultiplier, 0.2f, 0.8f);
 
-        // Настраиваем цвет и материал
+        // Configure color and material
         Renderer r = slash.GetComponent<Renderer>();
         if (r != null)
         {
             r.material.color = color;
         }
 
-        // Удаляем этот визуальный плейсхолдер через 0.15 секунды (эффект быстрой вспышки)
+        // Destroy this visual placeholder after 0.15 seconds (quick flash effect)
         Destroy(slash, 0.15f);
     }
 
     private void OnTestDamagePressed(InputAction.CallbackContext context)
     {
-    // Ищем компонент здоровья на самом себе
+    // Look for a Health component on ourselves
     Health health = GetComponent<Health>();
     if (health != null)
     {
-        // Имитируем удар спереди: толкаем персонажа назад относительно его взгляда
+        // Simulate a frontal hit: push the character backward relative to its facing
         Vector3 pushDirection = -transform.forward * _cnockbackForce;
-        health.TakeDamage(15f, pushDirection); // Наносим 15 урона
-        Debug.Log("Тестовый урон нанесен персонажу!");
+        health.TakeDamage(15f, pushDirection); // Deal 15 damage
+        Debug.Log("Test damage dealt to the player!");
     }
     }
-    // Визуализируем радиус атаки в редакторе Unity для удобства настройки
+    // Visualize the attack radius in the Unity editor for easier tuning
     private void OnDrawGizmosSelected()
     {
         if (_attackPoint == null) return;
