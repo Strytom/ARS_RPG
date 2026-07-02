@@ -38,11 +38,13 @@ public class Player_Controller : MonoBehaviour
     private void OnEnable()
     {
         _inputActions.Enable();
+        _inputActions.Player.TestDamage.performed += OnTestDamagePressed;
     }
 
     private void OnDisable()
     {
         _inputActions.Disable();
+        _inputActions.Player.TestDamage.performed -= OnTestDamagePressed;
     }
 
     private void Update()
@@ -123,5 +125,17 @@ public class Player_Controller : MonoBehaviour
 
         // Smoothly rotate the character
         _rb.rotation = Quaternion.RotateTowards(_rb.rotation, targetRotation, _rotationSpeed * Time.fixedDeltaTime);
+    }
+    private void OnTestDamagePressed(InputAction.CallbackContext context)
+    {
+    // Ищем компонент здоровья на самом себе
+    Health health = GetComponent<Health>();
+    if (health != null)
+    {
+        // Имитируем удар спереди: толкаем персонажа назад относительно его взгляда
+        Vector3 pushDirection = -transform.forward * 8f; // Сила толчка = 8
+        health.TakeDamage(15f, pushDirection); // Наносим 15 урона
+        Debug.Log("Тестовый урон нанесен персонажу!");
+    }
     }
 }
