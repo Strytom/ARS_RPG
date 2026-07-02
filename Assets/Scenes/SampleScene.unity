@@ -119,6 +119,11 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &317433573 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1784553318814690841, guid: 98e5432fc020b43a69e4fbd4b90ae70a, type: 3}
+  m_PrefabInstance: {fileID: 6164335597393156205}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -569,6 +574,26 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8069416172746119075, guid: 98e5432fc020b43a69e4fbd4b90ae70a, type: 3}
   m_PrefabInstance: {fileID: 6164335597393156205}
   m_PrefabAsset: {fileID: 0}
+--- !u!23 &1589616448 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 854568605562698057, guid: 98e5432fc020b43a69e4fbd4b90ae70a, type: 3}
+  m_PrefabInstance: {fileID: 6164335597393156205}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1589616450
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 317433573}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 885d1fdd47fc846659ed4b171c7f688b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Health
+  _maxHP: 100
+  _invincibilityDuration: 0.5
+  _characterRenderer: {fileID: 1589616448}
 --- !u!1001 &6164335597393156205
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -640,7 +665,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1784553318814690841, guid: 98e5432fc020b43a69e4fbd4b90ae70a, type: 3}
+      insertIndex: 4
+      addedObject: {fileID: 1589616450}
   m_SourcePrefab: {fileID: 100100000, guid: 98e5432fc020b43a69e4fbd4b90ae70a, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

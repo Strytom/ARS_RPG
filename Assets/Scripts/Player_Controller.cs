@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System;
+using System.Collections;
 
 [RequireComponent(typeof(Rigidbody))]
 public class Player_Controller : MonoBehaviour
@@ -8,12 +10,18 @@ public class Player_Controller : MonoBehaviour
     [SerializeField] private float _speed = 6.0f;          // Running speed
     [SerializeField] private float _rotationSpeed = 720f;  // Character rotation speed (degrees per second)
     [SerializeField] private float _jumpForce = 10f;        // Force applied when jumping
+    [Header("Battle Parameters")]
+    [SerializeField] private Transform _attackPoint;       // Point in front of the player from which the attack is calculated
+    [SerializeField] private float _attackRadius = 1.5f;     // Radius of the damage zone
+    [SerializeField] private LayerMask _damageableLayer;    // Layer on which enemies/mannequins are located
+
     private Rigidbody _rb;
     private InputSystem_Actions _inputActions;
     private Transform _cameraTransform;
 
     private Vector2 _moveInput;     // WASD input direction from the player
     private Vector3 _moveDirection; // Final movement vector in world space
+    private float _cnockbackForce = 100f; // Force applied when taking damage
 
     // This property will be useful later to block movement while attacking
     public bool IsAttacking { get; set; } = false;
@@ -33,18 +41,32 @@ public class Player_Controller : MonoBehaviour
         // The character should not tip over during collisions.
         _rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
         _rb.useGravity = true;
+
+        // Если точка атаки не назначена вручную, создадим её программно чуть впереди игрока
+        if (_attackPoint == null)
+        {
+            GameObject ap = new GameObject("AttackPoint");
+            ap.transform.SetParent(transform);
+            ap.transform.localPosition = new Vector3(0, 0, 1.2f);
+            _attackPoint = ap.transform;
+        }
     }
 
     private void OnEnable()
     {
         _inputActions.Enable();
         _inputActions.Player.TestDamage.performed += OnTestDamagePressed;
+        // Подписка на атаки
+        _inputActions.Player.Attack.performed += OnLightAttack;
+        _inputActions.Player.HeavyAttack.performed += OnHeavyAttack;
     }
 
     private void OnDisable()
     {
         _inputActions.Disable();
         _inputActions.Player.TestDamage.performed -= OnTestDamagePressed;
+        _inputActions.Player.Attack.performed -= OnLightAttack;
+        _inputActions.Player.HeavyAttack.performed -= OnHeavyAttack;
     }
 
     private void Update()
@@ -126,6 +148,88 @@ public class Player_Controller : MonoBehaviour
         // Smoothly rotate the character
         _rb.rotation = Quaternion.RotateTowards(_rb.rotation, targetRotation, _rotationSpeed * Time.fixedDeltaTime);
     }
+    // --- БОЕВАЯ ЛОГИКА ---
+
+    private void OnLightAttack(InputAction.CallbackContext context)
+    {
+        if (IsAttacking) return;
+        StartCoroutine(AttackRoutine(damage: 10f, lockDuration: 0.25f, pushForce: 6f, color: Color.cyan, scaleMultiplier: 1f));
+    }
+
+    private void OnHeavyAttack(InputAction.CallbackContext context)
+    {
+        if (IsAttacking) return;
+        StartCoroutine(AttackRoutine(damage: 25f, lockDuration: 0.5f, pushForce: 15f, color: Color.red, scaleMultiplier: 1.5f));
+    }
+
+    private IEnumerator AttackRoutine(float damage, float lockDuration, float pushForce, Color color, float scaleMultiplier)
+    {
+        IsAttacking = true;
+        _rb.linearVelocity = Vector3.zero; // Сбрасываем физическую инерцию бега
+
+        // 1. Мгновенный доворот лицом в сторону направления взгляда камеры
+        if (_cameraTransform != null)
+        {
+            Vector3 lookDir = _cameraTransform.forward;
+            lookDir.y = 0; // Нам нужен только поворот по горизонтали
+            if (lookDir != Vector3.zero)
+            {
+                _rb.rotation = Quaternion.LookRotation(lookDir);
+            }
+        }
+
+        // 2. Создаем визуальный плейсхолдер взмаха (простой расширяющийся полупрозрачный куб перед нами)
+        SpawnSlashPlaceholder(color, scaleMultiplier);
+
+        // 3. Расчет попадания (Hit Detection)
+        // Находим все коллайдеры в зоне нашего удара
+        Collider[] hitColliders = Physics.OverlapSphere(_attackPoint.position, _attackRadius * scaleMultiplier, _damageableLayer);
+
+        foreach (Collider col in hitColliders)
+        {
+            // Проверяем, чтобы мы не ударили сами себя
+            if (col.gameObject == gameObject) continue;
+
+            // Ищем у объекта интерфейс IDamageable
+            IDamageable damageable = col.GetComponent<IDamageable>();
+            if (damageable != null)
+            {
+                // Рассчитываем вектор отталкивания (толкаем врага от себя)
+                Vector3 pushDirection = (col.transform.position - transform.position).normalized * pushForce;
+                
+                // Наносим урон через интерфейс!
+                damageable.TakeDamage(damage, pushDirection);
+            }
+        }
+
+        // Задержка (анимация удара и блокировка движения)
+        yield return new WaitForSeconds(lockDuration);
+        IsAttacking = false;
+    }
+    private void SpawnSlashPlaceholder(Color color, float scaleMultiplier)
+    {
+        // Создаем временный куб, имитирующий визуальную дугу взмаха меча
+        GameObject slash = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        Destroy(slash.GetComponent<BoxCollider>()); // Убираем коллайдер, чтобы он не мешал физике
+
+        slash.transform.SetParent(transform);
+        slash.transform.position = _attackPoint.position;
+        slash.transform.rotation = transform.rotation;
+        
+        // Делаем его плоским и широким (как дуга взмаха)
+        slash.transform.localScale = new Vector3(2.5f * scaleMultiplier, 0.2f, 0.8f);
+
+        // Настраиваем цвет и материал
+        Renderer r = slash.GetComponent<Renderer>();
+        if (r != null)
+        {
+            r.material.color = color;
+        }
+
+        // Удаляем этот визуальный плейсхолдер через 0.15 секунды (эффект быстрой вспышки)
+        Destroy(slash, 0.15f);
+    }
+
     private void OnTestDamagePressed(InputAction.CallbackContext context)
     {
     // Ищем компонент здоровья на самом себе
@@ -133,9 +237,16 @@ public class Player_Controller : MonoBehaviour
     if (health != null)
     {
         // Имитируем удар спереди: толкаем персонажа назад относительно его взгляда
-        Vector3 pushDirection = -transform.forward * 8f; // Сила толчка = 8
+        Vector3 pushDirection = -transform.forward * _cnockbackForce;
         health.TakeDamage(15f, pushDirection); // Наносим 15 урона
         Debug.Log("Тестовый урон нанесен персонажу!");
     }
+    }
+    // Визуализируем радиус атаки в редакторе Unity для удобства настройки
+    private void OnDrawGizmosSelected()
+    {
+        if (_attackPoint == null) return;
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(_attackPoint.position, _attackRadius);
     }
 }
