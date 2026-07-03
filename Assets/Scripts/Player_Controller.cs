@@ -39,7 +39,7 @@ public class Player_Controller : MonoBehaviour
 
         // Freeze default physics body rotation on the X and Z axes.
         // The character should not tip over during collisions.
-        _rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        _rb.constraints = RigidbodyConstraints.FreezeRotationX |RigidbodyConstraints.FreezeRotationY| RigidbodyConstraints.FreezeRotationZ;
         _rb.useGravity = true;
 
         // If the attack point isn't assigned manually, create it slightly in front of the player

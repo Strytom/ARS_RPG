@@ -9,6 +9,7 @@ public class DamageHazard : MonoBehaviour
     [SerializeField] private float _damage = 10f;          // Damage amount
     [SerializeField] private float _damageInterval = 0.5f; // Damage interval in seconds
     [SerializeField] private float _rotationSpeed = 120f;  // Hazard rotation speed for visuals
+    [SerializeField] private float _cnockbackForce = 70f;   // Knockback force applied to the player
 
     // Dictionary to track the last hit time per object (to avoid damage spam)
     private Dictionary<IDamageable, float> _damageCooldowns = new Dictionary<IDamageable, float>();
@@ -34,7 +35,7 @@ public class DamageHazard : MonoBehaviour
             if (Time.time >= _damageCooldowns[damageable])
             {
                 // Push the player away from the center of the hazard
-                Vector3 pushDir = (other.transform.position - transform.position).normalized * 5f;
+                Vector3 pushDir = (other.transform.position - transform.position).normalized * _cnockbackForce;
                 
                 damageable.TakeDamage(_damage, pushDir);
                 _damageCooldowns[damageable] = Time.time + _damageInterval;
