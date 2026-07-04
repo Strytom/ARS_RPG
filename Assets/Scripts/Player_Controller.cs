@@ -12,7 +12,7 @@ public class Player_Controller : MonoBehaviour
     [SerializeField] private float _jumpForce = 10f;        // Force applied when jumping
     [Header("Battle Parameters")]
     [SerializeField] private Transform _attackPoint;       // Point in front of the player from which the attack is calculated
-    [SerializeField] private float _attackRadius = 1.5f;     // Radius of the damage zone
+    [SerializeField] private float _attackRadius = 1f;     // Radius of the damage zone
     [SerializeField] private LayerMask _damageableLayer;    // Layer on which enemies/mannequins are located
 
     private Rigidbody _rb;
@@ -148,7 +148,7 @@ public class Player_Controller : MonoBehaviour
         // Smoothly rotate the character
         _rb.rotation = Quaternion.RotateTowards(_rb.rotation, targetRotation, _rotationSpeed * Time.fixedDeltaTime);
     }
-    // --- БОЕВАЯ ЛОГИКА ---
+    // --- Battle Logic ---
 
     private void OnLightAttack(InputAction.CallbackContext context)
     {
@@ -159,7 +159,7 @@ public class Player_Controller : MonoBehaviour
     private void OnHeavyAttack(InputAction.CallbackContext context)
     {
         if (IsAttacking) return;
-        StartCoroutine(AttackRoutine(damage: 25f, lockDuration: 0.5f, pushForce: 15f, color: Color.red, scaleMultiplier: 1.5f));
+        StartCoroutine(AttackRoutine(damage: 25f, lockDuration: 0.5f, pushForce: 15f, color: Color.red, scaleMultiplier: 2f));
     }
 
     private IEnumerator AttackRoutine(float damage, float lockDuration, float pushForce, Color color, float scaleMultiplier)
