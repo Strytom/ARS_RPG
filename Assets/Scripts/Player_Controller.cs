@@ -4,25 +4,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(Rigidbody))]
 public class Player_Controller : MonoBehaviour
 {
+    // Declare attack trajectory types
+    public enum AttackPattern { Linear, Arc, Whirlwind, GroundSlam, Spiral }
+
     [Header("Movement Parameters")]
     [SerializeField] private float _speed = 6.0f;
     [SerializeField] private float _rotationSpeed = 720f;
 
     [Header("Combat Parameters")]
-    [SerializeField] private float _attackRadius = 1f;     // Base hit sphere radius
+    [SerializeField] private float _attackRadius = 1.2f;     // Base radius of the damage sphere
     [SerializeField] private LayerMask _damageableLayer;    // Enemy layer
+    [SerializeField] private float _attackHeightOffset = 1.0f; // Height of the strike relative to the ground
 
-    [Header("Attack Trajectory Settings (Local Offsets)")]
-    // Light attack: strikes quickly, directly in front
-    [SerializeField] private Vector3 _lightAttackStart = new Vector3(0f, 1.0f, 0.5f); // Point A (local)
-    [SerializeField] private Vector3 _lightAttackEnd = new Vector3(0f, 1.0f, 4f);   // Point B (local)
-
-    // Heavy attack: strikes farther and wider
-    [SerializeField] private Vector3 _heavyAttackStart = new Vector3(0f, 1.0f, 0.8f); // Point A (local)
-    [SerializeField] private Vector3 _heavyAttackEnd = new Vector3(0f, 1.0f, 8.0f);   // Point B (local)
+    [Header("Specific Pattern Settings")]
+    [Tooltip("Start and end points for linear trajectories")]
+    [SerializeField] private Vector3 _linearStart = new Vector3(0f, 1.0f, 0.5f);
+    [SerializeField] private Vector3 _linearEnd = new Vector3(0f, 1.0f, 3.5f);
 
     private Rigidbody _rb;
     private InputSystem_Actions _inputActions;
@@ -33,10 +32,10 @@ public class Player_Controller : MonoBehaviour
 
     public bool IsAttacking { get; set; } = false;
 
-    // Helper variables for debugging gizmos in the scene
-    private Vector3 _debugPointA;
-    private Vector3 _debugPointB;
-    private float _debugRadius;
+    // --- Variables for dynamic debugging in the Scene View ---
+    private Vector3 _currentDebugCenter;
+    private float _currentDebugRadius;
+    private bool _drawActiveGizmo = false;
 
     private void Awake()
     {
@@ -48,9 +47,7 @@ public class Player_Controller : MonoBehaviour
             _cameraTransform = Camera.main.transform;
         }
 
-        _rb.constraints = RigidbodyConstraints.FreezeRotationX | 
-        RigidbodyConstraints.FreezeRotationY | 
-        RigidbodyConstraints.FreezeRotationZ;
+        _rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
         _rb.useGravity = true;
     }
 
@@ -123,92 +120,144 @@ public class Player_Controller : MonoBehaviour
         _rb.rotation = Quaternion.RotateTowards(_rb.rotation, targetRotation, _rotationSpeed * Time.fixedDeltaTime);
     }
 
-    // --- COMBAT LOGIC ---
+    // --- COMBAT SYSTEM (ATTACK PATTERNS) ---
 
     private void OnLightAttack(InputAction.CallbackContext context)
     {
         if (IsAttacking) return;
-        StartCoroutine(AttackTrajectoryRoutine(
-            localStart: _lightAttackStart,
-            localEnd: _lightAttackEnd,
+        
+        // LIGHT ATTACK: Arc Cleave (Semi-circular fan swing in front of the player)
+        StartCoroutine(AttackRoutine(
+            pattern: AttackPattern.Arc,
             damage: 10f,
-            lockDuration: 0.25f,
+            lockDuration: 0.3f,
             pushForce: 6f,
+            distance: 2.0f,            // Distance of the semicircle
+            angleRange: 140f,          // Angle of the swing
             color: Color.cyan,
-            radiusMultiplier: 1.0f
+            radiusScale: 1.0f
         ));
     }
 
     private void OnHeavyAttack(InputAction.CallbackContext context)
     {
         if (IsAttacking) return;
-        StartCoroutine(AttackTrajectoryRoutine(
-            localStart: _heavyAttackStart,
-            localEnd: _heavyAttackEnd,
+
+        // HEAVY ATTACK: Spiral Sweep (Spiral whirlwind that hits around and moves outward)
+        StartCoroutine(AttackRoutine(
+            pattern: AttackPattern.Spiral,
             damage: 25f,
-            lockDuration: 0.50f,
+            lockDuration: 0.6f,
             pushForce: 15f,
+            distance: 4.0f,            // Maximum radius of the spiral
+            angleRange: 720f,          // Spiral makes 2 full rotations (360 * 2)
             color: Color.red,
-            radiusMultiplier: 1.5f
+            radiusScale: 1.3f
         ));
     }
 
-    private IEnumerator AttackTrajectoryRoutine(Vector3 localStart, Vector3 localEnd, float damage, float lockDuration, float pushForce, Color color, float radiusMultiplier)
+    private IEnumerator AttackRoutine(
+        AttackPattern pattern, 
+        float damage, 
+        float lockDuration, 
+        float pushForce, 
+        float distance, 
+        float angleRange, 
+        Color color, 
+        float radiusScale)
     {
         IsAttacking = true;
-        _rb.linearVelocity = Vector3.zero; 
+        _rb.linearVelocity = Vector3.zero;
 
-        // 1. Instantly rotate the character toward the camera look direction
+        // 1. Rotate towards the aim
         if (_cameraTransform != null)
         {
             Vector3 lookDir = _cameraTransform.forward;
-            lookDir.y = 0; 
+            lookDir.y = 0;
             if (lookDir != Vector3.zero)
             {
                 _rb.rotation = Quaternion.LookRotation(lookDir);
             }
         }
 
-        // 2. TAKE A SPACE SNAPSHOT
-        // Convert local start and end coordinates to world points
-        Vector3 worldPointA = transform.TransformPoint(localStart);
-        Vector3 worldPointB = transform.TransformPoint(localEnd);
+        // Capture world start/turn points at the start of the strike (space snapshot)
+        Vector3 startPivot = transform.position;
+        Vector3 localForwardSnapshot = transform.forward;
+        Vector3 worldPointA = transform.TransformPoint(_linearStart);
+        Vector3 worldPointB = transform.TransformPoint(_linearEnd);
 
-        // Save for debug drawing in the editor
-        _debugPointA = worldPointA;
-        _debugPointB = worldPointB;
-        _debugRadius = _attackRadius * radiusMultiplier;
-
-        // 3. Lunge - apply physical force at the point
-        Vector3 lungeForce = _cameraTransform.forward * (pushForce * 0.35f); 
-        _rb.AddForce(lungeForce, ForceMode.Impulse);
+        // Physical impulse pushing the player forward (for feel/dynamics)
+        _rb.AddForce(transform.forward * (pushForce * 0.3f), ForceMode.Impulse);
 
         HashSet<IDamageable> hitTargetsThisSwing = new HashSet<IDamageable>();
         
-        float activeDamageDuration = 0.15f; 
+        // Active damage phase simulation time
+        float activeDamageDuration = 0.20f; 
         float timer = 0f;
 
-        // Create a moving visual wave placeholder
-        GameObject slashVisual = SpawnSlashWave(worldPointA, color, radiusMultiplier);
+        // Spawn visual indicator (energy sphere)
+        GameObject slashVisual = SpawnVisualSphere(color, _attackRadius * radiusScale);
 
-        // Active damage phase
+        _drawActiveGizmo = true;
+
         while (timer < activeDamageDuration)
         {
-            // Find attack progress from 0 to 1
             float progress = timer / activeDamageDuration;
+            Vector3 currentHitCenter = Vector3.zero;
+            float currentScanRadius = _attackRadius * radiusScale;
 
-            // MATH LERP: Find the current hitbox coordinate along line A->B
-            Vector3 currentHitCenter = Vector3.Lerp(worldPointA, worldPointB, progress);
+            // --- Mathematical selection of trajectory ---
+            switch (pattern)
+            {
+                case AttackPattern.Linear:
+                    // Simple flight forward along the vector from A to B
+                    currentHitCenter = Vector3.Lerp(worldPointA, worldPointB, progress);
+                    break;
 
-            // Sync the visual object with the hitbox point
+                case AttackPattern.Arc:
+                    // Semi-circular swing. Interpolate angle from -HalfAngle to +HalfAngle
+                    float currentArcAngle = Mathf.Lerp(-angleRange / 2f, angleRange / 2f, progress);
+                    // Rotate the horizontal forward vector
+                    Vector3 arcDir = Quaternion.AngleAxis(currentArcAngle, Vector3.up) * localForwardSnapshot;
+                    currentHitCenter = startPivot + (arcDir * distance) + (Vector3.up * _attackHeightOffset);
+                    break;
+
+                case AttackPattern.Whirlwind:
+                    // Circular strike around the player (360 degrees)
+                    float currentSpinAngle = Mathf.Lerp(0f, 360f, progress);
+                    Vector3 spinDir = Quaternion.AngleAxis(currentSpinAngle, Vector3.up) * localForwardSnapshot;
+                    currentHitCenter = startPivot + (spinDir * distance) + (Vector3.up * _attackHeightOffset);
+                    break;
+
+                case AttackPattern.GroundSlam:
+                    // Area slam at distance. Point is static but sphere radius expands
+                    Vector3 slamCenter = startPivot + (localForwardSnapshot * distance) + (Vector3.up * _attackHeightOffset);
+                    currentHitCenter = slamCenter;
+                    currentScanRadius = Mathf.Lerp(0.1f, _attackRadius * radiusScale, progress);
+                    break;
+
+                case AttackPattern.Spiral:
+                    // Spiral: the sphere spins around the player while moving outward
+                    float currentSpiralAngle = Mathf.Lerp(0f, angleRange, progress);
+                    float currentSpiralDist = Mathf.Lerp(0.5f, distance, progress);
+                    Vector3 spiralDir = Quaternion.AngleAxis(currentSpiralAngle, Vector3.up) * localForwardSnapshot;
+                    currentHitCenter = startPivot + (spiralDir * currentSpiralDist) + (Vector3.up * _attackHeightOffset);
+                    break;
+            }
+
+            // Update debug variables
+            _currentDebugCenter = currentHitCenter;
+            _currentDebugRadius = currentScanRadius;
+
+            // Synchronize visual effect
             if (slashVisual != null)
             {
                 slashVisual.transform.position = currentHitCenter;
+                slashVisual.transform.localScale = Vector3.one * (currentScanRadius * 2f);
             }
 
-            // Scan space at this dynamic point
-            Collider[] hitColliders = Physics.OverlapSphere(currentHitCenter, _attackRadius * radiusMultiplier, _damageableLayer);
-
+            // Scan the area at the computed point
+            Collider[] hitColliders = Physics.OverlapSphere(currentHitCenter, currentScanRadius, _damageableLayer);
             foreach (Collider col in hitColliders)
             {
                 if (col.gameObject == gameObject) continue;
@@ -226,13 +275,11 @@ public class Player_Controller : MonoBehaviour
             yield return new WaitForFixedUpdate();
         }
 
-        // Smoothly destroy the visual object at the end of the active phase
-        if (slashVisual != null)
-        {
-            Destroy(slashVisual);
-        }
+        // Cleanup visual after the strike
+        _drawActiveGizmo = false;
+        if (slashVisual != null) Destroy(slashVisual);
 
-        // Recovery delay for the character
+        // Recovery phase
         float remainingLock = lockDuration - activeDamageDuration;
         if (remainingLock > 0)
         {
@@ -240,35 +287,28 @@ public class Player_Controller : MonoBehaviour
         }
 
         IsAttacking = false;
-        _rb.linearVelocity = Vector3.zero; 
+        _rb.linearVelocity = Vector3.zero;
     }
 
-    private GameObject SpawnSlashWave(Vector3 startPos, Color color, float scaleMultiplier)
+    private GameObject SpawnVisualSphere(Color color, float scaleRadius)
     {
-        // Create a temporary sphere indicator for the wave
-        GameObject slash = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        Destroy(slash.GetComponent<Collider>()); // Remove the collider
+        GameObject visual = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        Destroy(visual.GetComponent<Collider>()); // Remove physical collider
 
-        slash.transform.position = startPos;
-        slash.transform.localScale = Vector3.one * (_attackRadius * 2f * scaleMultiplier);
-
-        Renderer r = slash.GetComponent<Renderer>();
+        Renderer r = visual.GetComponent<Renderer>();
         if (r != null)
         {
-            // Make the material semi-transparent for an energy effect
+            // Configure semi-transparent material to show the "strike energy"
             r.material.color = new Color(color.r, color.g, color.b, 0.4f);
-            
-            // Set the rendering mode to transparent (if using the standard shader)
             r.material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
             r.material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
             r.material.SetInt("_ZWrite", 0);
             r.material.DisableKeyword("_ALPHATEST_ON");
             r.material.EnableKeyword("_ALPHABLEND_ON");
-            r.material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
             r.material.renderQueue = 3000;
         }
 
-        return slash;
+        return visual;
     }
 
     private void OnTestDamagePressed(InputAction.CallbackContext context)
@@ -281,21 +321,13 @@ public class Player_Controller : MonoBehaviour
         }
     }
 
-    // Draw the last attack trajectory directly in the Scene view
+    // Dynamic drawing of the sphere in real-time in the Scene View during testing
     private void OnDrawGizmos()
     {
-        if (!Application.isPlaying) return;
+        if (!Application.isPlaying || !_drawActiveGizmo) return;
 
-        // Draw the A->B line
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawLine(_debugPointA, _debugPointB);
-
-        // Draw the start sphere
-        Gizmos.color = new Color(0f, 1f, 0f, 0.3f); // Green start
-        Gizmos.DrawWireSphere(_debugPointA, _debugRadius);
-
-        // Draw the end sphere
-        Gizmos.color = new Color(1f, 0f, 0f, 0.3f); // Red finish
-        Gizmos.DrawWireSphere(_debugPointB, _debugRadius);
+        Gizmos.color = new Color(1f, 0.92f, 0.016f, 0.5f); // Bright yellow semi-transparent color
+        Gizmos.DrawWireSphere(_currentDebugCenter, _currentDebugRadius);
+        Gizmos.DrawSphere(_currentDebugCenter, _currentDebugRadius * 0.15f); // Small core at the center of the hitbox
     }
 }
