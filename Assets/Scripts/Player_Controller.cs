@@ -132,10 +132,10 @@ public class Player_Controller : MonoBehaviour
             damage: 10f,
             lockDuration: 0.3f,
             pushForce: 6f,
-            distance: 2.0f,            // Distance of the semicircle
-            angleRange: 140f,          // Angle of the swing
+            distance: 3.0f,            // Distance of the semicircle
+            angleRange: 70f,          // Angle of the swing
             color: Color.cyan,
-            radiusScale: 1.0f
+            radiusScale: 0.5f
         ));
     }
 
@@ -143,14 +143,14 @@ public class Player_Controller : MonoBehaviour
     {
         if (IsAttacking) return;
 
-        // HEAVY ATTACK: Spiral Sweep (Spiral whirlwind that hits around and moves outward)
+        // HEAVY ATTACK: Ground Slam (Downward strike that hits in a circular area)
         StartCoroutine(AttackRoutine(
-            pattern: AttackPattern.Spiral,
+            pattern: AttackPattern.GroundSlam,
             damage: 25f,
             lockDuration: 0.6f,
             pushForce: 15f,
-            distance: 4.0f,            // Maximum radius of the spiral
-            angleRange: 720f,          // Spiral makes 2 full rotations (360 * 2)
+            distance: 4.0f,            // Maximum radius of the ground slam
+            angleRange: 360f,          // Full rotation (360 degrees)
             color: Color.red,
             radiusScale: 1.3f
         ));
@@ -182,7 +182,7 @@ public class Player_Controller : MonoBehaviour
 
         // Capture world start/turn points at the start of the strike (space snapshot)
         Vector3 startPivot = transform.position;
-        Vector3 localForwardSnapshot = transform.forward;
+        Vector3 localForwardSnapshot = _cameraTransform.forward;
         Vector3 worldPointA = transform.TransformPoint(_linearStart);
         Vector3 worldPointB = transform.TransformPoint(_linearEnd);
 
