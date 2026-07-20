@@ -10,8 +10,9 @@ public class Player_Controller : MonoBehaviour
     public enum AttackPattern { Linear, Arc, Whirlwind, GroundSlam, Spiral }
 
     [Header("Movement Parameters")]
-    [SerializeField] private float _speed = 6.0f;
+    [SerializeField] private float _speed = 12f;
     [SerializeField] private float _rotationSpeed = 720f;
+    [SerializeField] private float _jumpForce = 100.0f;
 
     [Header("Combat Parameters")]
     [SerializeField] private float _attackRadius = 1.2f;     // Base radius of the damage sphere
@@ -75,6 +76,7 @@ public class Player_Controller : MonoBehaviour
 
     private void FixedUpdate()
     {
+        Jump();
         Move();
         RotateTowardsMovement();
     }
@@ -106,18 +108,58 @@ public class Player_Controller : MonoBehaviour
 
     private void Move()
     {
-        if (_moveDirection == Vector3.zero || IsAttacking) return;
-
-        Vector3 newPosition = _rb.position + _moveDirection * _speed * Time.fixedDeltaTime;
-        _rb.MovePosition(newPosition);
+        if (_moveDirection == Vector3.zero || IsAttacking) {
+            _rb.linearVelocity = new Vector3(0, _rb.linearVelocity.y, 0);
+            return;
+        }   
+        if (!IsGrounded()) 
+        {
+            _rb.linearVelocity = new Vector3(_moveDirection.x * _speed * 0.5f, _rb.linearVelocity.y, _moveDirection.z * _speed * 0.5f);
+        } else
+        {
+            _rb.linearVelocity = new Vector3(_moveDirection.x * _speed, _rb.linearVelocity.y, _moveDirection.z * _speed);
+        }
+    }
+    private void Jump()
+    {
+        if(IsAttacking) return;
+        if (_inputActions.Player.Jump.triggered && IsGrounded())
+        {
+            // Apply an upward force to the Rigidbody to make the character jump
+            _rb.AddRelativeForce(Vector3.up * _jumpForce, ForceMode.Impulse);
+        }
+    }
+    private bool IsGrounded()
+    {
+        // Check if the character is grounded by casting a ray downwards
+        return Physics.Raycast(transform.position, Vector3.down, 1.1f);
     }
 
     private void RotateTowardsMovement()
     {
+        // If the player is not moving or is currently attacking, we don't want to change the rotation
         if (_moveDirection == Vector3.zero || IsAttacking) return;
 
-        Quaternion targetRotation = Quaternion.LookRotation(_moveDirection);
-        _rb.rotation = Quaternion.RotateTowards(_rb.rotation, targetRotation, _rotationSpeed * Time.fixedDeltaTime);
+        if (_cameraTransform != null)
+        {
+            // Take the forward direction of the camera as the reference for rotation
+            Vector3 camForward = _cameraTransform.forward;
+            
+            // Project the camera's forward vector onto the horizontal plane
+            // This ensures that the character doesn't tilt up or down when the camera is looking up or down
+            camForward.y = 0;
+
+            if (camForward != Vector3.zero)
+            {
+                camForward.Normalize();
+                
+                // Calculate the target rotation based on the camera's forward direction
+                Quaternion targetRotation = Quaternion.LookRotation(camForward);
+                
+                // Smoothly rotate the character towards the target rotation
+                _rb.rotation = Quaternion.RotateTowards(_rb.rotation, targetRotation, _rotationSpeed * Time.fixedDeltaTime);
+            }
+        }
     }
 
     // --- COMBAT SYSTEM (ATTACK PATTERNS) ---
@@ -182,7 +224,7 @@ public class Player_Controller : MonoBehaviour
 
         // Capture world start/turn points at the start of the strike (space snapshot)
         Vector3 startPivot = transform.position;
-        Vector3 localForwardSnapshot = _cameraTransform.forward;
+        Vector3 localForwardSnapshot = new Vector3(_cameraTransform.forward.x, 0, _cameraTransform.forward.z).normalized;
         Vector3 worldPointA = transform.TransformPoint(_linearStart);
         Vector3 worldPointB = transform.TransformPoint(_linearEnd);
 
