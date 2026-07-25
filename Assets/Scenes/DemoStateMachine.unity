@@ -1801,11 +1801,24 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1890174043}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8e9189a5ff1ca4719877c1e17879d22a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStateMachine
+  <Input>k__BackingField: {fileID: 1890174051}
+--- !u!114 &1890174051
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1890174043}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b6c9f129e6b64a74ae8c309911cc623, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InputReader
 --- !u!1 &1967315228
 GameObject:
   m_ObjectHideFlags: 0
@@ -1951,7 +1964,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8333490811774314289, guid: 98e5432fc020b43a69e4fbd4b90ae70a, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8333490811774314289, guid: 98e5432fc020b43a69e4fbd4b90ae70a, type: 3}
       propertyPath: _jumpForce
@@ -1967,6 +1980,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1784553318814690841, guid: 98e5432fc020b43a69e4fbd4b90ae70a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1890174045}
+    - targetCorrespondingSourceObject: {fileID: 1784553318814690841, guid: 98e5432fc020b43a69e4fbd4b90ae70a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1890174051}
   m_SourcePrefab: {fileID: 100100000, guid: 98e5432fc020b43a69e4fbd4b90ae70a, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
