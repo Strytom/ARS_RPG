@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 
 public class InputReader : MonoBehaviour, InputSystem_Actions.IPlayerActions
 {
+    public Vector2 MovementValue { get; private set; }
     public event System.Action OnJumpEvent, OnDodgeEvent;
 
     private InputSystem_Actions _inputActions;
@@ -51,6 +52,7 @@ public class InputReader : MonoBehaviour, InputSystem_Actions.IPlayerActions
 
     public void OnMove(InputAction.CallbackContext context)
     {
+        MovementValue = context.ReadValue<Vector2>();
     }
 
     public void OnNext(InputAction.CallbackContext context)
