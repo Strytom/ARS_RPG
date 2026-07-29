@@ -171,30 +171,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5603528457879732971, guid: 755bdd517019c4cfe83aa7ce5f27a7af, type: 3}
-      propertyPath: m_Height
-      value: 1.767378
-      objectReference: {fileID: 0}
-    - target: {fileID: 5603528457879732971, guid: 755bdd517019c4cfe83aa7ce5f27a7af, type: 3}
-      propertyPath: m_Radius
-      value: 0.15692186
-      objectReference: {fileID: 0}
-    - target: {fileID: 5603528457879732971, guid: 755bdd517019c4cfe83aa7ce5f27a7af, type: 3}
-      propertyPath: m_Center.x
-      value: 0.0030975342
-      objectReference: {fileID: 0}
-    - target: {fileID: 5603528457879732971, guid: 755bdd517019c4cfe83aa7ce5f27a7af, type: 3}
-      propertyPath: m_Center.y
-      value: -0.18482655
-      objectReference: {fileID: 0}
-    - target: {fileID: 5603528457879732971, guid: 755bdd517019c4cfe83aa7ce5f27a7af, type: 3}
-      propertyPath: m_Center.z
-      value: 0.01139164
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 966831892460624044, guid: 755bdd517019c4cfe83aa7ce5f27a7af, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4802317342903064494, guid: 755bdd517019c4cfe83aa7ce5f27a7af, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6739804597167007340}
+    - targetCorrespondingSourceObject: {fileID: 4802317342903064494, guid: 755bdd517019c4cfe83aa7ce5f27a7af, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6739804597167007341}
   m_SourcePrefab: {fileID: 100100000, guid: 755bdd517019c4cfe83aa7ce5f27a7af, type: 3}
 --- !u!1 &82653661
 GameObject:
@@ -1884,6 +1871,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStateMachine
   <Input>k__BackingField: {fileID: 1890174051}
+  <Rigidbody>k__BackingField: {fileID: 0}
+  <Animator>k__BackingField: {fileID: 0}
+  <_walkSpeed>k__BackingField: 5
+  <_rotationSpeed>k__BackingField: 720
 --- !u!114 &1890174051
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1975,9 +1966,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1207228520583080325 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4802317342903064494, guid: 755bdd517019c4cfe83aa7ce5f27a7af, type: 3}
+  m_PrefabInstance: {fileID: 50481087}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1984749733320815423 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5327356493599542548, guid: 755bdd517019c4cfe83aa7ce5f27a7af, type: 3}
+  m_PrefabInstance: {fileID: 50481087}
+  m_PrefabAsset: {fileID: 0}
+--- !u!54 &4808677945598384083 stripped
+Rigidbody:
+  m_CorrespondingSourceObject: {fileID: 1215539523771558392, guid: 755bdd517019c4cfe83aa7ce5f27a7af, type: 3}
   m_PrefabInstance: {fileID: 50481087}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6164335597393156205
@@ -2070,6 +2071,56 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1890174051}
   m_SourcePrefab: {fileID: 100100000, guid: 98e5432fc020b43a69e4fbd4b90ae70a, type: 3}
+--- !u!114 &6739804597167007339 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1147632093263779904, guid: 755bdd517019c4cfe83aa7ce5f27a7af, type: 3}
+  m_PrefabInstance: {fileID: 50481087}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1207228520583080325}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b6c9f129e6b64a74ae8c309911cc623, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InputReader
+--- !u!114 &6739804597167007340
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1207228520583080325}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e9189a5ff1ca4719877c1e17879d22a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerStateMachine
+  <Input>k__BackingField: {fileID: 6739804597167007339}
+  <Rigidbody>k__BackingField: {fileID: 4808677945598384083}
+  <Animator>k__BackingField: {fileID: 6739804597167007341}
+  <_walkSpeed>k__BackingField: 5
+  <_rotationSpeed>k__BackingField: 720
+--- !u!95 &6739804597167007341
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1207228520583080325}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: bb30c716f623d46b9a363f8281d41ad3, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

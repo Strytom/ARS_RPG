@@ -7,7 +7,7 @@ public class PlayerTestState : PlayerBaseState
     private Vector2 _moveInput;
     private Vector3 _moveDirection;
     private Transform _cameraTransform;
-    private float _speed => _stateMachine._speed;
+    private float _walkSpeed => _stateMachine._walkSpeed;
     private float _rotationSpeed => _stateMachine._rotationSpeed;
     public PlayerTestState(PlayerStateMachine stateMachine) : base(stateMachine) { }
     public override void Enter()
@@ -28,12 +28,17 @@ public class PlayerTestState : PlayerBaseState
 
     private void Move()
     {
-            _stateMachine.Rigidbody.linearVelocity = new Vector3(_moveDirection.x * _speed, _stateMachine.Rigidbody.linearVelocity.y, _moveDirection.z * _speed);
+        if (_moveDirection == Vector3.zero){ 
+            _stateMachine.Animator.SetFloat("FreeLookBlend", 0f, 0.1f, Time.deltaTime);
+            return ;
+            }
+            _stateMachine.Animator.SetFloat("FreeLookBlend", 1f, 0.1f, Time.deltaTime);
+            _stateMachine.Rigidbody.linearVelocity = new Vector3(_moveDirection.x * _walkSpeed, _stateMachine.Rigidbody.linearVelocity.y, _moveDirection.z * _walkSpeed);
     }
 
     private void RotateTowardsMovement()
     {
-if (_moveDirection == Vector3.zero) return;
+        if (_moveDirection == Vector3.zero) return;
 
         if (_cameraTransform != null)
         {
