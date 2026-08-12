@@ -10,11 +10,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: f5f5bb1116ad345ee9e4f28da0bc9e7c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 88.1
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f5f5bb1116ad345ee9e4f28da0bc9e7c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.331
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f5f5bb1116ad345ee9e4f28da0bc9e7c, type: 3}
       propertyPath: m_LocalPosition.z
@@ -83,7 +83,10 @@ PrefabInstance:
       addedObject: {fileID: 1147632093263779904}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5f5bb1116ad345ee9e4f28da0bc9e7c, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 966831892460624044}
+      addedObject: {fileID: 7823839852692894677}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5f5bb1116ad345ee9e4f28da0bc9e7c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6901175833243449173}
   m_SourcePrefab: {fileID: 100100000, guid: f5f5bb1116ad345ee9e4f28da0bc9e7c, type: 3}
 --- !u!1 &4802317342903064494 stripped
 GameObject:
@@ -152,7 +155,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b6c9f129e6b64a74ae8c309911cc623, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InputReader
---- !u!114 &966831892460624044
+--- !u!114 &7823839852692894677
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -161,18 +164,33 @@ MonoBehaviour:
   m_GameObject: {fileID: 4802317342903064494}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2fb98b1774ef144869b93c0b1e81f1c0, type: 3}
+  m_Script: {fileID: 11500000, guid: 8e9189a5ff1ca4719877c1e17879d22a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Player_Controller_test
-  _speed: 12
-  _rotationSpeed: 720
-  _jumpForce: 100
-  _attackRadius: 1.2
-  _damageableLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  _attackHeightOffset: 1
-  _linearStart: {x: 0, y: 1, z: 0.5}
-  _linearEnd: {x: 0, y: 1, z: 3.5}
-  _comboSteps: []
-  _comboResetTime: 0.8
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerStateMachine
+  <Input>k__BackingField: {fileID: 1147632093263779904}
+  <Rigidbody>k__BackingField: {fileID: 1215539523771558392}
+  <Animator>k__BackingField: {fileID: 6901175833243449173}
+  <FreeLookSpeed>k__BackingField: 6
+  <RotationDamping>k__BackingField: 10
+--- !u!95 &6901175833243449173
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4802317342903064494}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: bb30c716f623d46b9a363f8281d41ad3, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

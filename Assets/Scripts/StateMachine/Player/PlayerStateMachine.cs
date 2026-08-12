@@ -7,10 +7,14 @@ public class PlayerStateMachine : StateMachine
     [field: SerializeField] public Rigidbody Rigidbody { get; private set; }
     [field: SerializeField] public Animator Animator { get; private set; }
     [Header("Player References")]
-    [field: SerializeField] public float _walkSpeed { get; private set; } = 5f;
-    [field: SerializeField] public float _rotationSpeed { get; private set; } = 720f;
+    [field: SerializeField] public float FreeLookSpeed { get; private set; } = 5f;
+    [field: SerializeField] public float RotationDamping { get; private set; } = 10f;
+
+    public Transform CameraTransform { get; private set; }
 
     private void Start() {
-        SwitchState(new PlayerTestState(this));
+        CameraTransform = Camera.main.transform;
+
+        SwitchState(new PlayerFreeLookState(this));
     }
 }
