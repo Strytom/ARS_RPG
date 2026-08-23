@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 public class InputReader : MonoBehaviour, InputSystem_Actions.IPlayerActions
 {
     public Vector2 MovementValue { get; private set; }
-    public event System.Action OnJumpEvent, OnDodgeEvent;
+    public event System.Action OnJumpEvent, OnDodgeEvent, OnTargetEvent;
 
     private InputSystem_Actions _inputActions;
     private void Start()
@@ -69,5 +69,11 @@ public class InputReader : MonoBehaviour, InputSystem_Actions.IPlayerActions
 
     public void OnTestDamage(InputAction.CallbackContext context)
     {
+    }
+
+    public void OnTarget(InputAction.CallbackContext context)
+    {
+        if (!context.performed) { return; }
+        OnTargetEvent?.Invoke();
     }
 }

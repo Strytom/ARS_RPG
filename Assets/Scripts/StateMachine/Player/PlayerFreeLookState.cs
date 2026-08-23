@@ -10,7 +10,10 @@ public class PlayerFreeLookState : PlayerBaseState
     public PlayerFreeLookState(PlayerStateMachine stateMachine) : base(stateMachine) { }
     public override void Enter()
     {
-       _stateMachine.Rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
+        _stateMachine.Input.OnTargetEvent += OnTarget;
+        _stateMachine.Rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
+        _stateMachine.cineFreeLookCamera.Priority = 1;
+        _stateMachine.cineTargetCamera.Priority = 0;    
     }
 
     public override void Tick(float deltaTime)
@@ -20,7 +23,7 @@ public class PlayerFreeLookState : PlayerBaseState
 
     public override void Exit()
     {
-        
+        _stateMachine.Input.OnTargetEvent -= OnTarget;
     }
 
     private void Move(float deltaTime)
@@ -55,7 +58,6 @@ public class PlayerFreeLookState : PlayerBaseState
 
         return _moveDirection;
     }
-
     private Quaternion FaceMovementDirection(Vector3 moveDirection, float deltaTime)
     {
         return Quaternion.Lerp(_stateMachine.transform.rotation, 
@@ -63,4 +65,12 @@ public class PlayerFreeLookState : PlayerBaseState
         _stateMachine.RotationDamping * deltaTime);
     }
     
+     private void OnTarget()
+    {
+        if (!_stateMachine.Targeter.SelectTarget())
+        { return; }
+
+        _stateMachine.SwitchState(new PlayerTargeterState(_stateMachine));
+    }
+
 }
