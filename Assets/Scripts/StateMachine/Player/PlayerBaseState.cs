@@ -8,4 +8,45 @@ public abstract class PlayerBaseState : State
     {
         this._stateMachine = stateMachine;
     }
+    protected void Move(float deltaTime)
+    {
+        Move(Vector2.zero, deltaTime);
+    }
+    protected void Move(Vector3 moveDirection, float deltaTime)
+    {
+        _stateMachine.Rigidbody.linearVelocity = new Vector3(moveDirection.x * _stateMachine.FreeLookSpeed, _stateMachine.Rigidbody.linearVelocity.y, moveDirection.z * _stateMachine.FreeLookSpeed);
+    }
+    protected void FaceMovementTarget(float deltaTime)
+    {
+        if (_stateMachine.Targeter.CurrentTarget == null) return;
+
+        Vector3 directionToTarget = _stateMachine.Targeter.CurrentTarget.transform.position - _stateMachine.transform.position;
+        directionToTarget.y = 0; 
+
+        if (directionToTarget.sqrMagnitude > 0.001f)
+        {
+        Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
+        _stateMachine.Rigidbody.MoveRotation(Quaternion.Slerp(
+            _stateMachine.Rigidbody.rotation, 
+            targetRotation, 
+            _stateMachine.RotationDamping * deltaTime));
+        }
+       
+    }
+    protected Vector3 CalculateMovementDirection()
+    {
+
+        Vector3 camForward = _stateMachine.CameraTransform.forward;
+        Vector3 camRight = _stateMachine.CameraTransform.right;
+
+        camForward.y = 0;
+        camRight.y = 0;
+
+        camForward.Normalize();
+        camRight.Normalize();
+
+        Vector3 moveDirection = (camForward * _stateMachine.Input.MovementValue.y + camRight * _stateMachine.Input.MovementValue.x);
+
+        return moveDirection;
+    }
 }

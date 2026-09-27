@@ -2572,9 +2572,45 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 24344113}
     - target: {fileID: 8280100481891802667, guid: 5c23732117a5b423baf165d99b45d528, type: 3}
+      propertyPath: <Attack>k__BackingField.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8280100481891802667, guid: 5c23732117a5b423baf165d99b45d528, type: 3}
+      propertyPath: <Attacks>k__BackingField.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8280100481891802667, guid: 5c23732117a5b423baf165d99b45d528, type: 3}
       propertyPath: <cineFreeLookCamera>k__BackingField
       value: 
       objectReference: {fileID: 1548562071}
+    - target: {fileID: 8280100481891802667, guid: 5c23732117a5b423baf165d99b45d528, type: 3}
+      propertyPath: '<Attack>k__BackingField.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 879fe4bc5796045488771b48c955459a, type: 2}
+    - target: {fileID: 8280100481891802667, guid: 5c23732117a5b423baf165d99b45d528, type: 3}
+      propertyPath: '<Attack>k__BackingField.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: d9acc0357683c404a8c97f374191bada, type: 2}
+    - target: {fileID: 8280100481891802667, guid: 5c23732117a5b423baf165d99b45d528, type: 3}
+      propertyPath: '<Attack>k__BackingField.Array.data[2]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 84c4259ae2abc4f9db7cdd443d014c2e, type: 2}
+    - target: {fileID: 8280100481891802667, guid: 5c23732117a5b423baf165d99b45d528, type: 3}
+      propertyPath: <AttackScriptables>k__BackingField.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8280100481891802667, guid: 5c23732117a5b423baf165d99b45d528, type: 3}
+      propertyPath: '<AttackScriptables>k__BackingField.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: d736fec4424b74875bda09d36c8b571e, type: 2}
+    - target: {fileID: 8280100481891802667, guid: 5c23732117a5b423baf165d99b45d528, type: 3}
+      propertyPath: '<AttackScriptables>k__BackingField.Array.data[1]'
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 8280100481891802667, guid: 5c23732117a5b423baf165d99b45d528, type: 3}
+      propertyPath: <Attacks>k__BackingField.Array.data[0].<Name>k__BackingField
+      value: Attack1
+      objectReference: {fileID: 0}
     - target: {fileID: 8877265165431382117, guid: 5c23732117a5b423baf165d99b45d528, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.7878723

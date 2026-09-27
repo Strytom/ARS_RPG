@@ -15,6 +15,7 @@ public class PlayerStateMachine : StateMachine
     [Header("Player References")]
     [field: SerializeField] public float FreeLookSpeed { get; private set; } = 5f;
     [field: SerializeField] public float RotationDamping { get; private set; } = 2.5f;
+    [field: SerializeField] public Attack[] Attack { get; private set; }
 
     public Transform CameraTransform { get; private set; }
     

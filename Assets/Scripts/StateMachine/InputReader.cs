@@ -4,7 +4,8 @@ using UnityEngine.InputSystem;
 public class InputReader : MonoBehaviour, InputSystem_Actions.IPlayerActions
 {
     public Vector2 MovementValue { get; private set; }
-    public event System.Action OnJumpEvent, OnDodgeEvent, OnTargetEvent;
+    public event System.Action OnJumpEvent, OnAttackEvent, OnTargetEvent;
+    public bool IsAttacking { get; private set; }
 
     private InputSystem_Actions _inputActions;
     private void Start()
@@ -21,6 +22,15 @@ public class InputReader : MonoBehaviour, InputSystem_Actions.IPlayerActions
     }
     public void OnAttack(InputAction.CallbackContext context)
     {
+        if (context.performed)
+        {
+            IsAttacking = true;
+            OnAttackEvent?.Invoke();
+        }
+        else if (context.canceled)
+        {
+            IsAttacking = false;
+        }
     }
 
     public void OnCrouch(InputAction.CallbackContext context)
@@ -28,9 +38,7 @@ public class InputReader : MonoBehaviour, InputSystem_Actions.IPlayerActions
     }
 
     public void OnDodge(InputAction.CallbackContext context)
-    {
-        if (!context.performed){return;}
-        OnDodgeEvent?.Invoke();
+    {   
     }
     public void OnHeavyAttack(InputAction.CallbackContext context)
     {

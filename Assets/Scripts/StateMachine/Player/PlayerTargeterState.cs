@@ -4,6 +4,10 @@ using Unity.Cinemachine;
 
 public class PlayerTargeterState : PlayerBaseState
 {
+    private readonly int TargetingBlendTreeHash = Animator.StringToHash("TargetingBlendTree");
+    private readonly int TargetingForwardHash = Animator.StringToHash("TargetingForward");
+    private readonly int TargetingRightHash = Animator.StringToHash("TargetingRight");
+
     public PlayerTargeterState(PlayerStateMachine stateMachine) : base(stateMachine) { }
 
     public override void Enter()
@@ -14,69 +18,40 @@ public class PlayerTargeterState : PlayerBaseState
 
         _stateMachine.cineFreeLookCamera.Priority = 0;
         _stateMachine.cineTargetCamera.Priority = 1;
+
+        _stateMachine.Animator.Play(TargetingBlendTreeHash);
     }
 
     public override void Tick(float deltaTime)
     {
+        if (_stateMachine.Input.IsAttacking)
+        {
+            _stateMachine.SwitchState(new PlayerAttackState(_stateMachine, attackIndex: 0));
+            return;
+        }
         if (_stateMachine.Targeter.CurrentTarget == null)
         {
             _stateMachine.SwitchState(new PlayerFreeLookState(_stateMachine));
             return;
         }
-        Move(deltaTime);
+        Movement(deltaTime);
+        UpdateAnimator(deltaTime);
         FaceMovementTarget(deltaTime);
     }
-
     public override void Exit()
     {
         _stateMachine.Input.OnTargetEvent -= OnTarget;
     }
-
-    private void Move(float deltaTime)
+    private void Movement(float deltaTime)
     {
         Vector3 _moveDirection = CalculateMovementDirection();
 
-        _stateMachine.Rigidbody.linearVelocity = new Vector3(_moveDirection.x * _stateMachine.FreeLookSpeed, _stateMachine.Rigidbody.linearVelocity.y, _moveDirection.z * _stateMachine.FreeLookSpeed);
-
+        Move(_moveDirection, deltaTime);
         if (_moveDirection == Vector3.zero)
         {
             _stateMachine.Rigidbody.linearVelocity = new Vector3(0f, _stateMachine.Rigidbody.linearVelocity.y, 0f);//Stop the player from moving when there is no input
             return;
         }
-    }
-
-    private Vector3 CalculateMovementDirection()
-    {
-
-        Vector3 camForward = _stateMachine.CameraTransform.forward;
-        Vector3 camRight = _stateMachine.CameraTransform.right;
-
-        camForward.y = 0;
-        camRight.y = 0;
-
-        camForward.Normalize();
-        camRight.Normalize();
-
-        Vector3 _moveDirection = (camForward * _stateMachine.Input.MovementValue.y + camRight * _stateMachine.Input.MovementValue.x);
-
-        return _moveDirection;
-    }
-    private void FaceMovementTarget(float deltaTime)
-    {
-        if (_stateMachine.Targeter.CurrentTarget == null) return;
-
-        Vector3 directionToTarget = _stateMachine.Targeter.CurrentTarget.transform.position - _stateMachine.transform.position;
-        directionToTarget.y = 0; 
-
-        if (directionToTarget.sqrMagnitude > 0.001f)
-        {
-        Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
-        _stateMachine.Rigidbody.MoveRotation(Quaternion.Slerp(
-            _stateMachine.Rigidbody.rotation, 
-            targetRotation, 
-            _stateMachine.RotationDamping * deltaTime));
-        }
-       
     }
 
     public void AlignFreeLookCameraWithCurrentView()
@@ -108,5 +83,29 @@ public class PlayerTargeterState : PlayerBaseState
         _stateMachine.Targeter.ClearTarget();
         _stateMachine.SwitchState(new PlayerFreeLookState(_stateMachine)); 
     
+    }
+    private void UpdateAnimator(float deltaTime)
+    {
+        if (_stateMachine.Input.MovementValue.y == 0)
+        {
+            _stateMachine.Animator.SetFloat(TargetingForwardHash, 0, 0.1f, deltaTime);
+        }
+        else
+        {
+            float value = _stateMachine.Input.MovementValue.y > 0 ? 1f : -1f;
+            _stateMachine.Animator.SetFloat(TargetingForwardHash, value, 0.1f, deltaTime);
+        }
+
+        if (_stateMachine.Input.MovementValue.x == 0)
+        {
+            _stateMachine.Animator.SetFloat(TargetingRightHash, 0, 0.1f, deltaTime);
+        }
+        else
+        {
+            float value = _stateMachine.Input.MovementValue.x > 0 ? 1f : -1f;
+            _stateMachine.Animator.SetFloat(TargetingRightHash, value, 0.1f, deltaTime);
+        }
+
+
     }
 }
