@@ -16,7 +16,7 @@ public class Health : MonoBehaviour
 
     // Events for updating UI and animations (Observer Pattern)
     public event Action<float, float> OnHealthChanged; // Passes (current HP, max HP)
-    public event Action OnDamageTaken; // Triggered when damage is taken
+    public event Action OnDamageTaken, OnDeath; 
 
     private void Start()
     {
@@ -27,11 +27,15 @@ public class Health : MonoBehaviour
 
     public void DealDamage(float amount)
     {
+        Debug.Log($"Damage received: {amount}. Current HP: {_currentHP}");
+        if(_currentHP <=0)
+        {
+            OnDeath?.Invoke();
+            return;
+        }
         if (_isInvincible || _currentHP == 0) return;
 
         _currentHP = Mathf.Max(_currentHP - amount, 0);
-
-        Debug.Log($"Damage taken: {amount}. Current HP: {_currentHP}/{_maxHP}");
 
         // Notify subscribers (for example, the health bar UI)
         OnHealthChanged?.Invoke(_currentHP, _maxHP);
@@ -56,5 +60,4 @@ public class Health : MonoBehaviour
 
         _isInvincible = false;
     }
-
 }

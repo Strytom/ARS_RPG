@@ -26,19 +26,28 @@ public class EnemyChaseState : EnemyBaseState
 
     public override void Tick(float deltaTime)
     {
-        MoveToPlayer(deltaTime);
         if (!IsInChaseRange())
         {
             _stateMachine.SwitchState(new EnemyIdleState(_stateMachine));
             return;
         }
-        _stateMachine.Animator.SetFloat(FreeLookSpeedHash, 1f, AnimationDampTime, deltaTime);
-
-        if (IsInAttackRange())
+        else if (IsInAttackRange())
         {
             _stateMachine.SwitchState(new EnemyAttackingState(_stateMachine, 0));
             return;
         }
+
+        MoveToPlayer(deltaTime);
+
+        FaceMovementTarget(deltaTime);
+
+    // Считаем реальную горизонтальную скорость движения паладина (без оси Y)
+        Vector3 horizontalVelocity = new Vector3(_stateMachine.Rigidbody.linearVelocity.x, 0, _stateMachine.Rigidbody.linearVelocity.z);
+    
+    // Если паладин движется (скорость > 0.2 м/с) — стремимся к 1f (Run), иначе к 0f (Idle)
+        float targetSpeedAnim = horizontalVelocity.sqrMagnitude > 0.05f ? 1f : 0f;
+
+        _stateMachine.Animator.SetFloat(FreeLookSpeedHash, targetSpeedAnim, AnimationDampTime, deltaTime);
     }
 
     private bool IsInAttackRange()
@@ -50,6 +59,7 @@ public class EnemyChaseState : EnemyBaseState
 
     private void MoveToPlayer(float deltaTime)
     {
+        if (_stateMachine.Agent.isOnNavMesh){
        // 1. Указываем цель (проецируя на плоскость, если игрок подпрыгнул)
         if (_stateMachine.Player != null){
         _stateMachine.Agent.SetDestination(_stateMachine.Player.transform.position);
@@ -75,9 +85,23 @@ public class EnemyChaseState : EnemyBaseState
     {
         Move(Vector3.zero, deltaTime);
     }
+        }
 
     // 3. Синхронизируем положение виртуального агента с реальным Rigidbody
-    _stateMachine.Agent.nextPosition = _stateMachine.transform.position;
+    //_stateMachine.Agent.nextPosition = _stateMachine.transform.position;
     _stateMachine.Agent.velocity = _stateMachine.Rigidbody.linearVelocity;
     }
+    private void MoveToPlayere(float deltaTime)
+    {
+        if (_stateMachine.Agent.isOnNavMesh)
+        {
+            _stateMachine.Agent.destination = _stateMachine.Player.transform.position;
+
+            Move(_stateMachine.Agent.desiredVelocity.normalized * _stateMachine.Speed, deltaTime);
+        }
+
+        _stateMachine.Agent.velocity = _stateMachine.Rigidbody.linearVelocity;
+    }
+
+
 }

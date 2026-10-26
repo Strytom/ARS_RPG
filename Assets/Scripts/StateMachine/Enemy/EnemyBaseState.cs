@@ -17,7 +17,7 @@ public abstract class EnemyBaseState : State
         Vector3 newVelocity = new Vector3(
             moveDirection.x * _stateMachine.Speed,
              _stateMachine.Rigidbody.linearVelocity.y, 
-             moveDirection.z * _stateMachine.Speed)+ _stateMachine.ForceReceiver.Move * deltaTime;
+             moveDirection.z * _stateMachine.Speed)+ _stateMachine.ForceReceiver.Move;
         _stateMachine.Rigidbody.linearVelocity = newVelocity;
     }
     protected void FaceMovementTarget(float deltaTime)

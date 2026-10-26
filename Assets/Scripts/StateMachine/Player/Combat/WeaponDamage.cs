@@ -23,12 +23,14 @@ public class WeaponDamage : MonoBehaviour
         if (other.TryGetComponent<Health>(out Health health))
         {
             health.DealDamage(_damage); // Example damage value, you can modify this as needed
+            Debug.Log($"Damage dealt to {other.name}: {_damage}");
         }
-         if(other.TryGetComponent<ForceReceiver>(out ForceReceiver forceReceiver))
+        
+         if(other.TryGetComponent<ForceReceiver>(out ForceReceiver ForceReceiver))
         {
-            Vector3 direction = (other.transform.position - transform.position).normalized;
+            Vector3 direction = (other.transform.position - MyCollider.transform.position).normalized;
             direction.y = 0; // Optional: Keep the knockback force horizontal
-            forceReceiver.AddForce(direction * _knockbackForce);
+            ForceReceiver.AddForce(direction * _knockbackForce);
         }
 
     }

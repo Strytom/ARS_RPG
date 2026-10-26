@@ -9,6 +9,7 @@ public class PlayerStateMachine : StateMachine
     [field: SerializeField] public Animator Animator { get; private set; }
     [field: SerializeField] public Targeter Targeter { get; private set; }
     [field: SerializeField] public Health Health { get; private set; }
+    [field: SerializeField] public Ragdoll Ragdoll { get; private set; }
     [field: SerializeField] public CinemachineCamera cineFreeLookCamera { get; private set; }
     [field: SerializeField] public CinemachineCamera cineTargetCamera { get; private set; }
 
@@ -33,14 +34,21 @@ public class PlayerStateMachine : StateMachine
     private void OnEnable()
     {
         Health.OnDamageTaken += HandleDamageTaken;
+        Health.OnDeath += HandleDeath;
     }
     private void OnDisable()
     {
         Health.OnDamageTaken -= HandleDamageTaken;
+        Health.OnDeath -= HandleDeath;
     }
 
     private void HandleDamageTaken()
     {
         SwitchState(new PlayerImpactState(this));
+    }
+
+    private void HandleDeath()
+    {
+        SwitchState(new PlayerDeadState(this));
     }
 }

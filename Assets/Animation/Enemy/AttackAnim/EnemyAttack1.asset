@@ -17,6 +17,6 @@ MonoBehaviour:
   <ComboStateIndex>k__BackingField: 1
   <ComboAttackTime>k__BackingField: 0.9
   <Damage>k__BackingField: 10
-  <AttackKnockback>k__BackingField: 1000
+  <AttackKnockback>k__BackingField: 500
   <Force>k__BackingField: 0
   <ForceTime>k__BackingField: 0
