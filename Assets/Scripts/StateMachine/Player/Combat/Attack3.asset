@@ -14,5 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Attack
   <AnimationName>k__BackingField: Attack3
   <TransitionDuration>k__BackingField: 0.1
-  <ComboStateIndex>k__BackingField: 3
-  <ComboAttackTime>k__BackingField: 0.6
+  <ComboStateIndex>k__BackingField: -1
+  <ComboAttackTime>k__BackingField: 0.8
+  <Damage>k__BackingField: 20
+  <AttackKnockback>k__BackingField: 20
+  <Force>k__BackingField: 1
+  <ForceTime>k__BackingField: 0.35

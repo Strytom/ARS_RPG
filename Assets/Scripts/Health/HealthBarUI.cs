@@ -5,16 +5,16 @@ using UnityEngine.UI;
 
 public class HealthBarUI : MonoBehaviour
 {
-    [Header("Ссылки на UI элементы")]
-    [SerializeField] private Slider _hpSlider;          // Ссылка на компонент Slider
-    [SerializeField] private Text _hpText;              // Текст для отображения "HP: 100/100" (опционально)
+    [Header("UI Elements")]
+    [SerializeField] private Slider _hpSlider;          // Reference to the Slider component
+    [SerializeField] private Text _hpText;              // Text for displaying "HP: 100/100" (optional)
 
-    [Header("Ссылка на здоровье Игрока")]
-    [SerializeField] private Health _playerHealth;      // Ссылка на компонент Health игрока
+    [Header("Reference to Player's Health")]
+    [SerializeField] private Health _playerHealth;      // Reference to the player's Health component
 
     private void Awake()
     {
-        // Если игрок не назначен вручную в инспекторе, попытаемся найти его по тегу
+        // If the player is not assigned manually in the inspector, try to find it by tag
         if (_playerHealth == null)
         {
             GameObject player = GameObject.FindWithTag("Player");
@@ -29,7 +29,6 @@ public class HealthBarUI : MonoBehaviour
     {
         if (_playerHealth != null)
         {
-            // Подписываемся на событие изменения ХП
             _playerHealth.OnHealthChanged += UpdateHealthBar;
         }
     }
@@ -38,7 +37,6 @@ public class HealthBarUI : MonoBehaviour
     {
         if (_playerHealth != null)
         {
-            // ОБЯЗАТЕЛЬНО отписываемся при выключении объекта, чтобы избежать утечек памяти!
             _playerHealth.OnHealthChanged -= UpdateHealthBar;
         }
     }
@@ -47,7 +45,6 @@ public class HealthBarUI : MonoBehaviour
     {
         if (_hpSlider != null)
         {
-            // Слайдер в Unity работает от 0 до 1, поэтому передаем отношение здоровья
             _hpSlider.value = currentHP / maxHP;
         }
 

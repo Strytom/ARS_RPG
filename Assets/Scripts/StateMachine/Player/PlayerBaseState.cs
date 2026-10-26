@@ -14,7 +14,11 @@ public abstract class PlayerBaseState : State
     }
     protected void Move(Vector3 moveDirection, float deltaTime)
     {
-        _stateMachine.Rigidbody.linearVelocity = new Vector3(moveDirection.x * _stateMachine.FreeLookSpeed, _stateMachine.Rigidbody.linearVelocity.y, moveDirection.z * _stateMachine.FreeLookSpeed);
+        Vector3 newVelocity = new Vector3(
+            moveDirection.x * _stateMachine.FreeLookSpeed,
+             _stateMachine.Rigidbody.linearVelocity.y, 
+             moveDirection.z * _stateMachine.FreeLookSpeed)+ _stateMachine.ForceReceiver.Move * deltaTime;
+        _stateMachine.Rigidbody.linearVelocity = newVelocity;
     }
     protected void FaceMovementTarget(float deltaTime)
     {
@@ -48,5 +52,16 @@ public abstract class PlayerBaseState : State
         Vector3 moveDirection = (camForward * _stateMachine.Input.MovementValue.y + camRight * _stateMachine.Input.MovementValue.x);
 
         return moveDirection;
+    }
+    protected void ReturnToLocomotion()
+    {
+       if(_stateMachine.Targeter.CurrentTarget != null)
+            {
+                _stateMachine.SwitchState(new PlayerTargeterState(_stateMachine));
+            }
+            else
+            {
+                _stateMachine.SwitchState(new PlayerFreeLookState(_stateMachine));
+            }
     }
 }

@@ -3,40 +3,73 @@ using UnityEngine;
 
 public class PlayerAttackState : PlayerBaseState
 {
+    private bool _isComboAttackQueued, _alreadyAppliedForce;
     private float _previousFrameTime;
     private Attack _attack;
 
     public PlayerAttackState(PlayerStateMachine stateMachine, int attackIndex) : base(stateMachine)
     {
         _attack = _stateMachine.Attack[attackIndex];
+        _stateMachine.Weapon.SetAttack(_attack.Damage, _attack.AttackKnockback);
     }
 
     public override void Enter()
     {
+        _stateMachine.Input.OnAttackEvent += OnCombatAttack;
+
         _stateMachine.Animator.CrossFadeInFixedTime(_attack.AnimationName, _attack.TransitionDuration);
+    }
+
+    private void OnCombatAttack()
+    {
+        _isComboAttackQueued = true;
     }
 
     public override void Exit()
     {
-        
+        _stateMachine.Input.OnAttackEvent -= OnCombatAttack;
     }
 
     public override void Tick(float deltaTime)
     {
         FaceMovementTarget(deltaTime);
         Move(deltaTime);
-        float normalizedTime = GetNormalizedTime();
+        
+        float normalizedTime = GetNormalizedTime(_stateMachine.Animator);
 
-        if (normalizedTime > _previousFrameTime && normalizedTime < 1f)
+        if (normalizedTime >= _previousFrameTime && normalizedTime < 1f)
         {
-            if(_stateMachine.Input.IsAttacking)
-            TryComboAttack(normalizedTime);
+            if(normalizedTime >= _attack.ForceTime)
+            {
+                TryApplyForce();
+            }
+            if (_isComboAttackQueued)
+            {
+                TryComboAttack(normalizedTime);
+            }
         }
-        else if (normalizedTime >= 1f)
+        else
         {
-            //_stateMachine.SwitchState(new PlayerFreeLookState(_stateMachine));
+            if(_stateMachine.Targeter.CurrentTarget != null)
+            {
+                _stateMachine.SwitchState(new PlayerTargeterState(_stateMachine));
+            }
+            else
+            {
+                _stateMachine.SwitchState(new PlayerFreeLookState(_stateMachine));
+            }
         }
+
         _previousFrameTime = normalizedTime;
+    }
+
+    private void TryApplyForce()
+    {
+        if (_alreadyAppliedForce) return;
+
+        _stateMachine.ForceReceiver.AddForce(_stateMachine.transform.forward * _attack.Force);
+
+        _alreadyAppliedForce = true;
     }
 
     private void TryComboAttack(float normalizedTime)
@@ -45,26 +78,4 @@ public class PlayerAttackState : PlayerBaseState
         if(normalizedTime < _attack.ComboAttackTime) return;
         _stateMachine.SwitchState(new PlayerAttackState(_stateMachine, _attack.ComboStateIndex));
     }
-
-    private float GetNormalizedTime()
-    {
-        AnimatorStateInfo currentAnimatorStateInfo = _stateMachine.Animator.GetCurrentAnimatorStateInfo(0);
-        AnimatorStateInfo nextAnimatorStateInfo = _stateMachine.Animator.GetNextAnimatorStateInfo(0);
-
-        if (_stateMachine.Animator.IsInTransition(0) &&  nextAnimatorStateInfo.IsTag("Attack"))
-        {
-            return nextAnimatorStateInfo.normalizedTime;
-        }
-        else if (! _stateMachine.Animator.IsInTransition(0) && currentAnimatorStateInfo.IsTag("Attack"))
-        {
-            return currentAnimatorStateInfo.normalizedTime;
-        }
-        else
-        {
-            return 0f;
-        }
-        
-    }
-    
-  
 }

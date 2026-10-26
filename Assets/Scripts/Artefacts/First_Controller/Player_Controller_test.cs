@@ -435,7 +435,7 @@ public class Player_Controller_test : MonoBehaviour
         if (health != null)
         {
             Vector3 pushDirection = -transform.forward * 8f;
-            health.TakeDamage(15f, pushDirection);
+            health.DealDamage(10f);
         }
     }
 

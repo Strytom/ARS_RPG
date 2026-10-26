@@ -8,10 +8,13 @@ public class PlayerTargeterState : PlayerBaseState
     private readonly int TargetingForwardHash = Animator.StringToHash("TargetingForward");
     private readonly int TargetingRightHash = Animator.StringToHash("TargetingRight");
 
+    private const float CrossFadeDuration = 0.1f;
+
     public PlayerTargeterState(PlayerStateMachine stateMachine) : base(stateMachine) { }
 
     public override void Enter()
     {
+        _stateMachine.Input.OnAttackEvent += OnAttack;
         _stateMachine.Input.OnTargetEvent += OnTarget;
 
         _stateMachine.Rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
@@ -19,16 +22,22 @@ public class PlayerTargeterState : PlayerBaseState
         _stateMachine.cineFreeLookCamera.Priority = 0;
         _stateMachine.cineTargetCamera.Priority = 1;
 
-        _stateMachine.Animator.Play(TargetingBlendTreeHash);
+        _stateMachine.Animator.CrossFadeInFixedTime(TargetingBlendTreeHash, CrossFadeDuration);
+
+        if (_stateMachine.Crosshair != null && _stateMachine.Targeter.CurrentTarget != null)
+        {
+        _stateMachine.Crosshair.SetTarget(_stateMachine.Targeter.CurrentTarget.transform);
+        }
+    }
+
+    private void OnAttack()
+    {
+        _stateMachine.SwitchState(new PlayerAttackState(_stateMachine, attackIndex: 0));
     }
 
     public override void Tick(float deltaTime)
     {
-        if (_stateMachine.Input.IsAttacking)
-        {
-            _stateMachine.SwitchState(new PlayerAttackState(_stateMachine, attackIndex: 0));
-            return;
-        }
+
         if (_stateMachine.Targeter.CurrentTarget == null)
         {
             _stateMachine.SwitchState(new PlayerFreeLookState(_stateMachine));
@@ -40,18 +49,23 @@ public class PlayerTargeterState : PlayerBaseState
     }
     public override void Exit()
     {
+        _stateMachine.Input.OnAttackEvent -= OnAttack;
         _stateMachine.Input.OnTargetEvent -= OnTarget;
+        if (_stateMachine.Crosshair != null)
+        {
+        _stateMachine.Crosshair.ClearTarget();
+        }
     }
     private void Movement(float deltaTime)
     {
         Vector3 _moveDirection = CalculateMovementDirection();
 
         Move(_moveDirection, deltaTime);
-        if (_moveDirection == Vector3.zero)
-        {
-            _stateMachine.Rigidbody.linearVelocity = new Vector3(0f, _stateMachine.Rigidbody.linearVelocity.y, 0f);//Stop the player from moving when there is no input
-            return;
-        }
+        // if (_moveDirection == Vector3.zero)
+        // {
+        //     _stateMachine.Rigidbody.linearVelocity = new Vector3(0f, _stateMachine.Rigidbody.linearVelocity.y, 0f);//Stop the player from moving when there is no input
+        //     return;
+        // }
     }
 
     public void AlignFreeLookCameraWithCurrentView()
