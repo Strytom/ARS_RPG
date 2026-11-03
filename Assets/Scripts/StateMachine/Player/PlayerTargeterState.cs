@@ -10,12 +10,16 @@ public class PlayerTargeterState : PlayerBaseState
 
     private const float CrossFadeDuration = 0.1f;
 
+
     public PlayerTargeterState(PlayerStateMachine stateMachine) : base(stateMachine) { }
 
     public override void Enter()
     {
         _stateMachine.Input.OnAttackEvent += OnAttack;
         _stateMachine.Input.OnTargetEvent += OnTarget;
+        _stateMachine.Input.OnBlockEvent += OnBlock;
+        _stateMachine.Input.OnDodgeEvent += OnDodge;
+        _stateMachine.Input.OnJumpEvent += OnJump;
 
         _stateMachine.Rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
 
@@ -24,17 +28,10 @@ public class PlayerTargeterState : PlayerBaseState
 
         _stateMachine.Animator.CrossFadeInFixedTime(TargetingBlendTreeHash, CrossFadeDuration);
 
-        if (_stateMachine.Crosshair != null && _stateMachine.Targeter.CurrentTarget != null)
-        {
+        if (_stateMachine.Crosshair != null && _stateMachine.Targeter.CurrentTarget != null){
         _stateMachine.Crosshair.SetTarget(_stateMachine.Targeter.CurrentTarget.transform);
         }
     }
-
-    private void OnAttack()
-    {
-        _stateMachine.SwitchState(new PlayerAttackState(_stateMachine, attackIndex: 0));
-    }
-
     public override void Tick(float deltaTime)
     {
 
@@ -51,21 +48,28 @@ public class PlayerTargeterState : PlayerBaseState
     {
         _stateMachine.Input.OnAttackEvent -= OnAttack;
         _stateMachine.Input.OnTargetEvent -= OnTarget;
+        _stateMachine.Input.OnBlockEvent -= OnBlock;
+        _stateMachine.Input.OnDodgeEvent -= OnDodge;
+        _stateMachine.Input.OnJumpEvent -= OnJump;
         if (_stateMachine.Crosshair != null)
         {
         _stateMachine.Crosshair.ClearTarget();
         }
     }
+
+    private void OnJump()
+    {
+        if (!_stateMachine.IsGrounded)
+        return;
+
+        _stateMachine.SwitchState(new PlayerJumpState(_stateMachine));
+    }
+
     private void Movement(float deltaTime)
     {
-        Vector3 _moveDirection = CalculateMovementDirection();
+        Vector3 _moveDirection = CalculateMovementDirection(deltaTime);
 
         Move(_moveDirection, deltaTime);
-        // if (_moveDirection == Vector3.zero)
-        // {
-        //     _stateMachine.Rigidbody.linearVelocity = new Vector3(0f, _stateMachine.Rigidbody.linearVelocity.y, 0f);//Stop the player from moving when there is no input
-        //     return;
-        // }
     }
 
     public void AlignFreeLookCameraWithCurrentView()
@@ -88,15 +92,6 @@ public class PlayerTargeterState : PlayerBaseState
             orbitalFollow.HorizontalAxis.Value = horizontal;
             orbitalFollow.VerticalAxis.Value = vertical + 10f;
         }
-    }
-
-    private void OnTarget()
-    {
-        
-        AlignFreeLookCameraWithCurrentView();
-        _stateMachine.Targeter.ClearTarget();
-        _stateMachine.SwitchState(new PlayerFreeLookState(_stateMachine)); 
-    
     }
     private void UpdateAnimator(float deltaTime)
     {
@@ -122,4 +117,29 @@ public class PlayerTargeterState : PlayerBaseState
 
 
     }
+    private void OnAttack()
+    {
+        _stateMachine.SwitchState(new PlayerAttackState(_stateMachine, attackIndex: 0));
+    }
+
+    private void OnTarget()
+    {
+        
+        AlignFreeLookCameraWithCurrentView();
+        _stateMachine.Targeter.ClearTarget();
+        _stateMachine.SwitchState(new PlayerFreeLookState(_stateMachine)); 
+    
+    }
+    private void OnBlock()
+    {
+        _stateMachine.SwitchState(new PlayerBlockingState(_stateMachine));
+    }
+    private void OnDodge()
+    {
+        if (Time.time - _stateMachine.PreviousDodgeTime < _stateMachine.DodgeCooldown) { return; }
+
+        _stateMachine.SetDodgeTime(Time.time);
+        _stateMachine.SwitchState(new PlayerDodgeState(_stateMachine, dodgingDirectionInput: _stateMachine.Input.MovementValue));
+    }
+
 }

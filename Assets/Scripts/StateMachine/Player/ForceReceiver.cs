@@ -37,4 +37,14 @@ public class ForceReceiver : MonoBehaviour
             _agent.enabled = false;
         }
     }
+    public void Jump(float force)
+    {
+       Vector3 velocity = _rb.linearVelocity;
+
+    // Сохраняем горизонтальную скорость.
+    // force / mass соответствует прибавке скорости от Impulse.
+    velocity.y = force / _rb.mass;
+
+    _rb.linearVelocity = velocity;
+    }
 }

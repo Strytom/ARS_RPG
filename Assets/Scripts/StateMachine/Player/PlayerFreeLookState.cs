@@ -14,6 +14,8 @@ public class PlayerFreeLookState : PlayerBaseState
     {
         _stateMachine.Input.OnAttackEvent += OnAttack;
         _stateMachine.Input.OnTargetEvent += OnTarget;
+        _stateMachine.Input.OnJumpEvent += OnJump;
+
         _stateMachine.Rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
         _stateMachine.cineFreeLookCamera.Priority = 1;
         _stateMachine.cineTargetCamera.Priority = 0;    
@@ -35,11 +37,20 @@ public class PlayerFreeLookState : PlayerBaseState
     {
         _stateMachine.Input.OnAttackEvent -= OnAttack;
         _stateMachine.Input.OnTargetEvent -= OnTarget;
+        _stateMachine.Input.OnJumpEvent -= OnJump;
+    }
+
+    private void OnJump()
+    {
+        if (!_stateMachine.IsGrounded)
+        return;
+
+        _stateMachine.SwitchState(new PlayerJumpState(_stateMachine));
     }
 
     private void Movement(float deltaTime)
     {
-        Vector3 _moveDirection = CalculateMovementDirection();
+        Vector3 _moveDirection = CalculateMovementDirection(deltaTime);
 
         Move(_moveDirection, deltaTime);
 

@@ -13,6 +13,7 @@ public class Health : MonoBehaviour
     [Header("Invincibility frames (i-frames)")]
     [SerializeField] private float _invincibilityDuration = 0.5f; // Duration of invincibility in seconds
     private bool _isInvincible = false;
+    public bool IsDead => _currentHP <= 0;
 
     // Events for updating UI and animations (Observer Pattern)
     public event Action<float, float> OnHealthChanged; // Passes (current HP, max HP)
@@ -27,30 +28,27 @@ public class Health : MonoBehaviour
 
     public void DealDamage(float amount)
     {
-        Debug.Log($"Damage received: {amount}. Current HP: {_currentHP}");
-        if(_currentHP <=0)
-        {
-            OnDeath?.Invoke();
-            return;
-        }
-        if (_isInvincible || _currentHP == 0) return;
+    // Мёртвые персонажи и неуязвимые не получают урон.
+        if (IsDead || _isInvincible || amount <= 0f) return;
 
-        _currentHP = Mathf.Max(_currentHP - amount, 0);
+        _currentHP = Mathf.Max(_currentHP - amount, 0f);
 
-        // Notify subscribers (for example, the health bar UI)
         OnHealthChanged?.Invoke(_currentHP, _maxHP);
 
-        // Notify subscribers (for example, the damage indicator UI)
-        OnDamageTaken?.Invoke();
+    // Проверяем смерть ПОСЛЕ уменьшения здоровья.
+        if (IsDead){
+        OnDeath?.Invoke();
+        return;
+        }
 
-        // Start the invincibility coroutine and red flash
+    // Реакция на удар — только если персонаж выжил.
+        OnDamageTaken?.Invoke();
         StartCoroutine(DamageFeedbackRoutine());
+        
     }
 
     private IEnumerator DamageFeedbackRoutine()
     {
-        _isInvincible = true;
-
         // Wait the remaining invincibility time
         float remainingTime = _invincibilityDuration - 0.15f;
         if (remainingTime > 0)
@@ -58,6 +56,9 @@ public class Health : MonoBehaviour
             yield return new WaitForSeconds(remainingTime);
         }
 
-        _isInvincible = false;
+    }
+    public void SetIsInvincible(bool value)
+    {
+        _isInvincible = value;
     }
 }

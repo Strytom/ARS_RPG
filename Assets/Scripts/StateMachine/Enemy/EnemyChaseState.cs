@@ -16,6 +16,8 @@ public class EnemyChaseState : EnemyBaseState
     public override void Enter()
     {
         _stateMachine.Animator.CrossFadeInFixedTime(LocoBlendTreeHash, 0.1f);
+        Debug.Log("Chase State Entered");
+
     }
 
     public override void Exit()
@@ -52,7 +54,7 @@ public class EnemyChaseState : EnemyBaseState
 
     private bool IsInAttackRange()
     {
-        if (_stateMachine.Player == null) return false;
+        if (_stateMachine.Player.IsDead) { return false; }
         float distance = Vector3.Distance(_stateMachine.Player.transform.position, _stateMachine.transform.position);
         return distance <= _stateMachine.AttackRange;
     }
@@ -88,7 +90,7 @@ public class EnemyChaseState : EnemyBaseState
         }
 
     // 3. Синхронизируем положение виртуального агента с реальным Rigidbody
-    //_stateMachine.Agent.nextPosition = _stateMachine.transform.position;
+    _stateMachine.Agent.nextPosition = _stateMachine.transform.position;
     _stateMachine.Agent.velocity = _stateMachine.Rigidbody.linearVelocity;
     }
     private void MoveToPlayere(float deltaTime)

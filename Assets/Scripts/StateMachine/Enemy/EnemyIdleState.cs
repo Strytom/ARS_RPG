@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class EnemyIdleState : EnemyBaseState
 {
-    private readonly int FreeLookBlendTreeHash = Animator.StringToHash("EnemyFreeLookBlend");
+    private readonly int FreeLookBlendTreeHash = Animator.StringToHash("LocoLookBlend");
     private readonly int FreeLookSpeedHash = Animator.StringToHash("Speed");
     private const float AnimationDampTime = 0.1f;
     private const float CrossFadeDuration = 0.1f;
@@ -15,6 +15,8 @@ public class EnemyIdleState : EnemyBaseState
     public override void Enter()
     {
         _stateMachine.Animator.CrossFadeInFixedTime(FreeLookBlendTreeHash, CrossFadeDuration);
+        Debug.Log("Idle State Entered");
+
     }
     public override void Exit()
     {

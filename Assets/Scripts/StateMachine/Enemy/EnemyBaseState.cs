@@ -36,9 +36,23 @@ public abstract class EnemyBaseState : State
             _stateMachine.RotationDamping * deltaTime));
         }       
     }
+    protected void FaceTarget()
+    {
+        if (_stateMachine.Player == null) return;
+
+        Vector3 directionToTarget = _stateMachine.Player.transform.position - _stateMachine.transform.position;
+        directionToTarget.y = 0; 
+
+        if (directionToTarget.sqrMagnitude > 0.001f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
+            _stateMachine.Rigidbody.MoveRotation(targetRotation);
+        }
+    }
 
     protected bool IsInChaseRange()
     {
+        if (_stateMachine.Player.IsDead) { return false; }
         float distanceToPlayer = Vector3.Distance(_stateMachine.transform.position, _stateMachine.Player.transform.position);
         return distanceToPlayer <= _stateMachine.ChaseRange;
     }

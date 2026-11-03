@@ -23,7 +23,6 @@ public class WeaponDamage : MonoBehaviour
         if (other.TryGetComponent<Health>(out Health health))
         {
             health.DealDamage(_damage); // Example damage value, you can modify this as needed
-            Debug.Log($"Damage dealt to {other.name}: {_damage}");
         }
         
          if(other.TryGetComponent<ForceReceiver>(out ForceReceiver ForceReceiver))

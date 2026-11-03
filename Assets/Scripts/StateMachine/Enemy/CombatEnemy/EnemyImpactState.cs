@@ -11,6 +11,8 @@ public class EnemyImpactState : EnemyBaseState
     public override void Enter()
     {
         _stateMachine.Animator.CrossFadeInFixedTime(impactHash, CrossFadeDuration);
+        Debug.Log("Impact State Entered");
+
     }
 
     public override void Exit()

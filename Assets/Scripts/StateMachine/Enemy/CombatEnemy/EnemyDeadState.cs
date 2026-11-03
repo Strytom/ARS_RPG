@@ -11,6 +11,8 @@ public class EnemyDeadState : EnemyBaseState
         _stateMachine.Ragdoll.ToggleRagdoll(true);
         _stateMachine.Weapon.gameObject.SetActive(false);
         GameObject.Destroy(_stateMachine.Target);
+        Debug.Log("Dead State Entered");
+
     }
 
     public override void Exit()

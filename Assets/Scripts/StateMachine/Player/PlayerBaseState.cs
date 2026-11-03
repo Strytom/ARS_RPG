@@ -3,6 +3,8 @@ using UnityEngine;
 public abstract class PlayerBaseState : State
 {
     protected PlayerStateMachine _stateMachine;
+    
+
 
     public PlayerBaseState(PlayerStateMachine stateMachine)
     {
@@ -37,19 +39,22 @@ public abstract class PlayerBaseState : State
         }
        
     }
-    protected Vector3 CalculateMovementDirection()
+    protected Vector3 CalculateMovementDirection(float deltaTime)
     {
 
         Vector3 camForward = _stateMachine.CameraTransform.forward;
         Vector3 camRight = _stateMachine.CameraTransform.right;
+        Vector3 moveDirection = Vector3.zero;
 
         camForward.y = 0;
         camRight.y = 0;
 
         camForward.Normalize();
         camRight.Normalize();
-
-        Vector3 moveDirection = (camForward * _stateMachine.Input.MovementValue.y + camRight * _stateMachine.Input.MovementValue.x);
+        
+        moveDirection = camRight * _stateMachine.Input.MovementValue.x + camForward * _stateMachine.Input.MovementValue.y;
+        moveDirection = Vector3.ClampMagnitude(moveDirection, 1f);
+        
 
         return moveDirection;
     }
