@@ -10,9 +10,16 @@ public class PlayerStateMachine : StateMachine
     [field: SerializeField] public Targeter Targeter { get; private set; }
     [field: SerializeField] public Health Health { get; private set; }
     [field: SerializeField] public Ragdoll Ragdoll { get; private set; }
+    [field: SerializeField] public LedgeDetector LedgeDetector { get; private set; }
+    [field: SerializeField] public GroundChecker GroundChecker { get; private set; }
+    [field: SerializeField] public WeaponDamage Weapon { get; private set; }
+    [field: SerializeField] public CrossHairTarget Crosshair { get; private set; }
+    [field: SerializeField] public ForceReceiver ForceReceiver { get; private set; }
+    [field: SerializeField] public Transform CameraTransform { get; private set; }
     [field: SerializeField] public CinemachineCamera cineFreeLookCamera { get; private set; }
     [field: SerializeField] public CinemachineCamera cineTargetCamera { get; private set; }
 
+    public bool IsGrounded => GroundChecker != null && GroundChecker.IsGrounded;
 
     [Header("Player References")]
     public float PreviousDodgeTime { get; private set; } = Mathf.NegativeInfinity;
@@ -20,19 +27,11 @@ public class PlayerStateMachine : StateMachine
     [field: SerializeField] public float DodgeLength { get; private set; }
     [field: SerializeField] public float DodgeCooldown { get; private set; }
     [field: SerializeField] public float JumpForce { get; private set; }
-    [field: SerializeField] public GroundChecker GroundChecker { get; private set; }
-
-    public bool IsGrounded => GroundChecker != null && GroundChecker.IsGrounded;
-
     [field: SerializeField] public float FreeLookSpeed { get; private set; } = 5f;
     [field: SerializeField] public float RotationDamping { get; private set; } = 2.5f;
-    [field: SerializeField] public ForceReceiver ForceReceiver { get; private set; }
     [field: SerializeField] public Attack[] Attack { get; private set; }
-    [field: SerializeField] public WeaponDamage Weapon { get; private set; }
-    [field: SerializeField] public CrossHairTarget Crosshair { get; private set; }
-    
-
-    public Transform CameraTransform { get; private set; }
+    [field: SerializeField] public LayerMask ClimbSurfaceMask { get; private set; }
+    [field: SerializeField] public float ClimbForwardDistance { get; private set; } = 0.5f;
     
 
     private void Start() {

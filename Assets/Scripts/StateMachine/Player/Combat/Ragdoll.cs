@@ -5,8 +5,8 @@ public class Ragdoll : MonoBehaviour
 {
     [Header("Core References")]
     [SerializeField] private Animator _animator;
-    [SerializeField] private Rigidbody _mainRigidbody;
-    [SerializeField] private Collider _mainCollider;
+    [SerializeField] private Rigidbody _mainRigidbody, _ledgeDetectorRigidbody;
+    [SerializeField] private Collider _mainCollider, _ledgeDetector;
     [SerializeField] private NavMeshAgent _navMeshAgent; // Опционально (для врагов)
 
     private Collider[] _ragdollColliders;
@@ -33,7 +33,7 @@ public class Ragdoll : MonoBehaviour
         // Управляем костями скелета (исключая главный корневой коллайдер)
         foreach (Collider col in _ragdollColliders)
         {
-            if (col == _mainCollider) continue;
+            if (col == _mainCollider || col == _ledgeDetector) continue;
             if (col.CompareTag("WeaponLogic")) continue; // Игнорируем коллайдер оружия
             col.enabled = isRagdoll;
         }
@@ -41,7 +41,7 @@ public class Ragdoll : MonoBehaviour
         // Управляем физикой костей скелета (исключая главный корневой Rigidbody)
         foreach (Rigidbody rb in _ragdollRigidbodies)
         {
-            if (rb == _mainRigidbody) continue;
+            if (rb == _mainRigidbody || rb == _ledgeDetectorRigidbody) continue;
             if (rb.CompareTag("WeaponLogic")) continue; // Игнорируем Rigidbody оружия
             rb.isKinematic = !isRagdoll;
             rb.useGravity = isRagdoll;

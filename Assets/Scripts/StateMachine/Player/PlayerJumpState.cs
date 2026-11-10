@@ -17,12 +17,20 @@ public class PlayerJumpState : PlayerBaseState
         _stateMachine.ForceReceiver.Jump(_stateMachine.JumpForce);
 
         _stateMachine.Animator.CrossFadeInFixedTime(JumpHash, CrossFadeDuration);
+
+        _stateMachine.LedgeDetector.OnLedgeDetected += HandleLedgeDetected;
     }
 
     public override void Exit()
     {
-        
+        _stateMachine.LedgeDetector.OnLedgeDetected -= HandleLedgeDetected;
     }
+     private void HandleLedgeDetected(Vector3 closestPoint, Vector3 ledgeForward)
+    {
+        Debug.Log("Ledge Detected in Jump State");
+        _stateMachine.SwitchState(new PlayerHangingState(_stateMachine, closestPoint, ledgeForward));
+    }
+
 
     public override void Tick(float deltaTime)
     {

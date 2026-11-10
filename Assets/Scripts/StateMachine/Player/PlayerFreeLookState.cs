@@ -15,6 +15,7 @@ public class PlayerFreeLookState : PlayerBaseState
         _stateMachine.Input.OnAttackEvent += OnAttack;
         _stateMachine.Input.OnTargetEvent += OnTarget;
         _stateMachine.Input.OnJumpEvent += OnJump;
+        _stateMachine.LedgeDetector.OnLedgeDetected += HandleLedgeDetected;
 
         _stateMachine.Rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
         _stateMachine.cineFreeLookCamera.Priority = 1;
@@ -38,6 +39,13 @@ public class PlayerFreeLookState : PlayerBaseState
         _stateMachine.Input.OnAttackEvent -= OnAttack;
         _stateMachine.Input.OnTargetEvent -= OnTarget;
         _stateMachine.Input.OnJumpEvent -= OnJump;
+        _stateMachine.LedgeDetector.OnLedgeDetected -= HandleLedgeDetected;
+    }
+
+    private void HandleLedgeDetected(Vector3 closestPoint, Vector3 ledgeForward)
+    {
+        Debug.Log("Ledge Detected in Free Look State");
+        _stateMachine.SwitchState(new PlayerHangingState(_stateMachine, closestPoint, ledgeForward));
     }
 
     private void OnJump()
